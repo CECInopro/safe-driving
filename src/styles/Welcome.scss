@@ -1,0 +1,51 @@
+.welcome-container {
+    min-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(200deg, #FF7208, #FFFF);
+    font-family: 'Arial', sans-serif;
+    padding: 2rem;
+}
+
+.welcome-logo {
+    width: 350px;
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+
+.welcome-title {
+    color: #000;
+    font-size: 3rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.4;
+}
+
+.welcome-button {
+    background: #FF8C42;
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 140, 66, 0.4);
+
+    &:hover {
+        background: #FF7A2E;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 140, 66, 0.6);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
