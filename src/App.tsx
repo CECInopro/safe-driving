@@ -6,6 +6,9 @@ import HomeLayout from './layout/HomeLayout';
 import Home from './pages/Home';
 import UserManager from './pages/UserManager';
 import TripManager from './pages/TripManager';
+import VehicleManager from './pages/VehicleManager';
+import Notification from './pages/Notification';
+import 'leaflet/dist/leaflet.css';
 
 
 function App() {
@@ -21,6 +24,8 @@ function App() {
                     <Route path='/home' element={<Home />} />
                     <Route path='/user-manager' element={<UserManager />} />
                     <Route path='/trip-manager' element={<TripManager />} />
+                    <Route path='/vehicle-manager' element={<VehicleManager />} />
+                    <Route path='/notification' element={<Notification />} />
                 </Route>
             </Routes>
         </Router>

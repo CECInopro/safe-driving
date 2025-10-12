@@ -17,7 +17,7 @@ const trips = [
         distance: '8km',
         status: 'Đang thực hiện',
     },
-    {
+    {   
         id: 3,
         driver: 'Dương Anh Đức',
         account: 'daduc',

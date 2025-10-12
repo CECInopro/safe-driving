@@ -1,0 +1,61 @@
+.car-manager {
+    padding: 32px;
+}
+
+.car-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 2px solid #0099ff;
+}
+
+.car-table th,
+.car-table td {
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.car-table th {
+    background: #f8f8f8;
+    font-weight: bold;
+}
+
+.car-table tr:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+.car-map-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.car-map-modal__content {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    min-width: 400px;
+    position: relative;
+}
+
+.car-map-modal__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #FF7208;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    cursor: pointer;
+}

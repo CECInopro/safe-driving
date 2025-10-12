@@ -11,21 +11,22 @@ const Sidebar: React.FC = () => {
     };
     return (
         <aside className="sidebar">
-            <div className="sidebar-logo">
+            <div className="sidebar-logo" onClick={() => navigate('/home')}>
                 <img src="/images/logo.png" alt="Logo" className="sidebar-logo-image" />
             </div>
             <nav>
                 <ul>
-                    <li>Trang chủ</li>
+                    <li onClick={() => navigate('/home')}>Trang chủ</li>
                     <li onClick={toggleDropdown}>Quản lý
                         {isDrop && (
                             <ul className="sidebar-dropdown">
                                 <li onClick={() => navigate('/user-manager')}>Quản lý người dùng</li>
                                 <li onClick={() => navigate('/trip-manager')}>Quản lý chuyến đi</li>
-                                <li onClick={() => navigate('/vihicle-manager')}>Quản lý xe</li>
+                                <li onClick={() => navigate('/vehicle-manager')}>Quản lý xe</li>
                             </ul>
                         )}
                     </li>
+                    <li onClick={() => navigate('/notification')}>Thông báo</li>
 
                 </ul>
             </nav>
