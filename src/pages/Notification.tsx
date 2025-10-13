@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "../styles/Notification.scss";
 import { getAllNotifications, markNotificationAsRead, deleteNotification, type NotificationItem } from "../firebase/firebase-messaging";
 
-// const RESPONSE_ENDPOINT = "api/v1/confirm-update-vehicle/";
 
 const Notification: React.FC = () => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
