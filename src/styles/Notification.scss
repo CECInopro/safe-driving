@@ -1,16 +1,120 @@
 .notification-container {
-    padding: 16px;
-    background: #fff;
-    border-radius: 8px;
-    max-width: 480px;
-    margin: 32px auto;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+
+    .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
 }
 
 .notification-title {
-    margin-bottom: 8px;
+    margin-bottom: 20px;
     font-size: 1.5rem;
     font-weight: 600;
+}
+
+.notification-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    
+    &.unread {
+        border-left: 4px solid #007bff;
+        background: #f8f9fa;
+    }
+
+    // Styling khác nhau cho từng topic
+    &.yesno {
+        border-left: 4px solid #28a745;
+        
+        &.unread {
+            border-left: 4px solid #28a745;
+            background: #f8fff9;
+        }
+    }
+
+    &.violation {
+        border-left: 4px solid #dc3545;
+        
+        &.unread {
+            border-left: 4px solid #dc3545;
+            background: #fff8f8;
+        }
+    }
+
+    &.info {
+        border-left: 4px solid #dc3545; // dùng màu giống violation
+        
+        &.unread {
+            border-left: 4px solid #dc3545;
+            background: #fff8f8; // nền giống violation khi chưa đọc
+        }
+    }
+
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+
+        .notification-title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            .topic-badge {
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                width: fit-content;
+
+                &.yesno {
+                    background: #d4edda;
+                    color: #155724;
+                }
+
+                &.violation {
+                    background: #f8d7da;
+                    color: #721c24;
+                }
+
+                &.info {
+                    background: #f8d7da; // badge nền giống violation
+                    color: #721c24;      // chữ giống violation
+                }
+            }
+        }
+
+        .notification-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #666;
+
+            .delete-btn {
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 4px 8px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+
+                &:hover {
+                    background: #c82333;
+                }
+            }
+        }
+    }
 }
 
 .notification-body {
@@ -28,25 +132,31 @@
 }
 
 .notification-actions {
-    margin-top: 12px;
+    margin-top: 16px;
     display: flex;
-    gap: 8px;
-}
+    gap: 10px;
 
-.notification-actions button {
-    padding: 8px 20px;
-    border-radius: 4px;
-    border: none;
-    background: #1976d2;
-    color: #fff;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-}
+    button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        
+        &:first-child {
+            background: #28a745;
+            color: white;
+        }
+        
+        &:last-child {
+            background: #dc3545;
+            color: white;
+        }
 
-.notification-actions button:disabled {
-    background: #bdbdbd;
-    cursor: not-allowed;
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
 }
 
 .notification-success {

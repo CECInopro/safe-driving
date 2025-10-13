@@ -18,22 +18,30 @@ messaging.onBackgroundMessage(function (payload) {
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        // Đính kèm toàn bộ payload để có thể gửi lại cho FE khi click
         data: payload,
         icon: '/images/logo.png'
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
-
-    // Nếu có cửa sổ đang mở, gửi payload ngay lập tức
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
-        clientList.forEach(function (client) {
-            try {
-                client.postMessage({ type: 'FCM_BACKGROUND_MESSAGE', payload: payload });
-            } catch (e) {
-                // ignore
-            }
-        });
+        if (clientList.length === 0) {
+            // Không có cửa sổ nào đang mở, lưu thông báo background
+            console.log('[firebase-messaging-sw.js] No active windows, saving background notification');
+            // Thông báo sẽ được lưu khi user click vào notification
+        } else {
+            // Có cửa sổ đang mở, gửi message để foreground handler xử lý
+            clientList.forEach(function (client) {
+                try {
+                    client.postMessage({ 
+                        type: 'FCM_BACKGROUND_MESSAGE', 
+                        payload: payload,
+                        action: 'save_notification'
+                    });
+                } catch (e) {
+                    // ignore
+                }
+            });
+        }
     });
 });
 
@@ -46,7 +54,13 @@ self.addEventListener('notificationclick', function (event) {
             if (clientList.length > 0) {
                 const client = clientList[0];
                 client.focus();
-                try { client.postMessage({ type: 'FCM_NOTIFICATION_CLICK', payload: payload }); } catch (e) {}
+                try { 
+                    client.postMessage({ 
+                        type: 'FCM_NOTIFICATION_CLICK', 
+                        payload: payload,
+                        action: 'save_notification'
+                    }); 
+                } catch (e) { }
                 return;
             }
             return self.clients.openWindow('/notification');
