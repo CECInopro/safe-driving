@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { FaEye } from 'react-icons/fa';
 import CarMapModal from '../components/VehicleMapModal';
 import '../styles/VehicleManager.scss';
-
+const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 type Vehicle = {
     vehicleId: string;
-    plate?: string;
-    driver?: string;
+    plateNumber?: string;
+    fullName?: string;
 };
 
 const VehicleManager: React.FC = () => {
@@ -20,7 +20,7 @@ const VehicleManager: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch('http://26.186.182.141:8080/api/v1/vehicles', {
+                const res = await fetch(`${BASE_URL}/api/v1/vehicles`, {
                     method: 'GET',
                     headers: {
                         'Content-type': 'application/json',
@@ -28,13 +28,27 @@ const VehicleManager: React.FC = () => {
                     },
                 });
                 if (!res.ok) throw new Error(`Fetch vehicles failed: ${res.status}`);
-                const data = await res.json();
-                const normalized: Vehicle[] = (Array.isArray(data) ? data : data?.items || []).map((v: any) => ({
-                    vehicleId: v.vehicleId || v.id || v.vehicle_id,
-                    plate: v.plate || v.plateNumber || v.plate_number,
-                    driver: v.driver || v.driverName || v.driver_name,
+                const raw = await res.json();
+
+                const list = Array.isArray(raw)
+                    ? raw
+                    : Array.isArray(raw?.data)
+                        ? raw.data
+                        : Array.isArray(raw?.items)
+                            ? raw.items
+                            : [];
+
+                const normalized: Vehicle[] = list.map((v: any) => ({
+                    vehicleId: v.vehicleId ?? v.id ?? v.vehicle_id,
+                    plateNumber: v.plateNumber ?? v.plate ?? v.plate_number,
+                    fullName: v.fullName ?? v.full_name ?? v.fullname ?? v.fullName ?? v.fullName,
                 })).filter((v: Vehicle) => !!v.vehicleId);
-                setVehicles(normalized);
+
+                const uniqueVehicles = Array.from(
+                    new Map(normalized.map(v => [v.vehicleId, v])).values()
+                );
+
+                setVehicles(uniqueVehicles);
             } catch (e: any) {
                 setError(e?.message || 'Không thể tải danh sách xe');
             } finally {
@@ -52,7 +66,7 @@ const VehicleManager: React.FC = () => {
                     <tr>
                         <th>Vehicle ID</th>
                         <th>Biển số xe</th>
-                        {/* <th>Người lái</th> */}
+                        <th>Người lái</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -69,8 +83,8 @@ const VehicleManager: React.FC = () => {
                     {!loading && !error && vehicles.map((car) => (
                         <tr key={car.vehicleId}>
                             <td style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis' }}>{car.vehicleId}</td>
-                            <td>{car.plate || '-'}</td>
-                            {/* <td>{car.driver || '-'}</td> */}
+                            <td>{car.plateNumber || '-'}</td>
+                            <td>{car.fullName || '-'}</td>
                             <td>
                                 <FaEye style={{ cursor: 'pointer' }} onClick={() => setSelectedCar(car)} />
                             </td>

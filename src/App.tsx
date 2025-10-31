@@ -9,7 +9,7 @@ import TripManager from './pages/TripManager';
 import VehicleManager from './pages/VehicleManager';
 import Notification from './pages/Notification';
 import 'leaflet/dist/leaflet.css';
-
+import DriverManager from './pages/DriverManager';
 
 function App() {
     return (
@@ -25,13 +25,12 @@ function App() {
                     <Route path='/user-manager' element={<UserManager />} />
                     <Route path='/trip-manager' element={<TripManager />} />
                     <Route path='/vehicle-manager' element={<VehicleManager />} />
+                    <Route path='/driver-manager' element={<DriverManager />} />
                     <Route path='/notification' element={<Notification />} />
                 </Route>
             </Routes>
         </Router>
     );
 }
-
-
 
 export default App;

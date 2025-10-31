@@ -24,8 +24,9 @@ export const initNotification = async () => {
         if (token) {
             const xRequestId = crypto.randomUUID();
             // 👇 Gửi token về server (BE)
-            const res = await fetch('http://26.186.182.141:8080/api/v1/accounts/update-token', {
+            const res = await fetch('http://ALB-save-driving-1470058884.ap-southeast-1.elb.amazonaws.com/api/v1/accounts/update-token', {
                 method: 'POST',
+                cache: "no-store",
                 headers: {
                     'Content-Type': 'application/json',
                     "xRequestId": xRequestId,

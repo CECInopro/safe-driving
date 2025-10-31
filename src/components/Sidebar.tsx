@@ -21,6 +21,7 @@ const Sidebar: React.FC = () => {
                         {isDrop && (
                             <ul className="sidebar-dropdown">
                                 <li onClick={() => navigate('/user-manager')}>Quản lý người dùng</li>
+                                <li onClick={() => navigate('/driver-manager')}>Quản lý tài xế</li>
                                 <li onClick={() => navigate('/trip-manager')}>Quản lý chuyến đi</li>
                                 <li onClick={() => navigate('/vehicle-manager')}>Quản lý xe</li>
                             </ul>
