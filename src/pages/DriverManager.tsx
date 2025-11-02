@@ -33,6 +33,7 @@ const DriverManager: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [showForm, setShowForm] = useState(false);
+    const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
 
 
 
@@ -172,7 +173,7 @@ const DriverManager: React.FC = () => {
     const onDelete = async (id: string) => {
         if (!confirm('Xóa tài xế này?')) return;
         try {
-            const res = await fetch(`http://ALB-save-driving-1470058884.ap-southeast-1.elb.amazonaws.com/api/v1/drivers/${id}`, {
+            const res = await fetch(`${BASE_URL}/api/v1/drivers/${id}`, {
                 method: 'DELETE',
             });
             if (!res.ok) throw new Error(`Xóa thất bại: ${res.status}`);
@@ -275,6 +276,7 @@ const DriverManager: React.FC = () => {
                 <thead>
                     <tr>
                         <th style={{ textAlign: 'left' }}>ID</th>
+                        <th>Ảnh</th>
                         <th>Họ tên</th>
                         <th>Email</th>
                         <th>SĐT</th>
@@ -285,11 +287,53 @@ const DriverManager: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {loading && <tr><td colSpan={8}>Đang tải...</td></tr>}
-                    {!loading && drivers.length === 0 && <tr><td colSpan={8}>Không có dữ liệu</td></tr>}
+                    {loading && <tr><td colSpan={9}>Đang tải...</td></tr>}
+                    {!loading && drivers.length === 0 && <tr><td colSpan={9}>Không có dữ liệu</td></tr>}
                     {!loading && drivers.map(d => (
                         <tr key={d.id}>
                             <td style={{ maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.id}</td>
+                            <td>
+                                {d.imageUrl ? (
+                                    <img
+                                        src={d.imageUrl}
+                                        alt={`${d.firstName} ${d.lastName}`}
+                                        style={{
+                                            width: 50,
+                                            height: 50,
+                                            objectFit: 'cover',
+                                            borderRadius: 4,
+                                            cursor: 'pointer',
+                                            border: '1px solid #ddd'
+                                        }}
+                                        onClick={() => setSelectedImageUrl(d.imageUrl || null)}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '';
+                                            target.alt = 'Image not available';
+                                            target.style.backgroundColor = '#f0f0f0';
+                                            target.style.display = 'flex';
+                                            target.style.alignItems = 'center';
+                                            target.style.justifyContent = 'center';
+                                            target.style.fontSize = '10px';
+                                            target.style.color = '#999';
+                                        }}
+                                    />
+                                ) : (
+                                    <div style={{
+                                        width: 50,
+                                        height: 50,
+                                        backgroundColor: '#f0f0f0',
+                                        borderRadius: 4,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: 12,
+                                        color: '#999'
+                                    }}>
+                                        No img
+                                    </div>
+                                )}
+                            </td>
                             <td>{[d.lastName, d.firstName].filter(Boolean).join(' ') || '-'}</td>
                             <td>{d.email || '-'}</td>
                             <td>{d.phone || '-'}</td>
@@ -303,6 +347,75 @@ const DriverManager: React.FC = () => {
                     ))}
                 </tbody>
             </table>
+
+            {/* Modal xem ảnh to */}
+            {selectedImageUrl && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                        cursor: 'pointer'
+                    }}
+                    onClick={() => setSelectedImageUrl(null)}
+                >
+                    <div
+                        style={{
+                            position: 'relative',
+                            maxWidth: '90vw',
+                            maxHeight: '90vh',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img
+                            src={selectedImageUrl}
+                            alt="Driver"
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '90vh',
+                                objectFit: 'contain',
+                                borderRadius: 8
+                            }}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                        />
+                        <button
+                            onClick={() => setSelectedImageUrl(null)}
+                            style={{
+                                position: 'absolute',
+                                top: 10,
+                                right: 10,
+                                background: 'rgba(255, 255, 255, 0.9)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: 40,
+                                height: 40,
+                                cursor: 'pointer',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                color: '#333',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                            }}
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

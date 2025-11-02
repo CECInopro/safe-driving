@@ -17,6 +17,7 @@
     "vite": "^7.1.2"
   },
   "dependencies": {
+    "@types/leaflet-routing-machine": "^3.2.9",
     "@types/react-router-dom": "^5.3.3",
     "firebase": "^12.3.0",
     "leaflet": "^1.9.4",

@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage, type MessagePayload } from "firebase/messaging";
 import type { NavigateFunction } from "react-router-dom";
+const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
 const firebaseConfig = {
     apiKey: "AIzaSyDKCzk80RBsZ9yoTWKVL5ILYgH0ww5jfbE",
@@ -24,7 +25,7 @@ export const initNotification = async () => {
         if (token) {
             const xRequestId = crypto.randomUUID();
             // 👇 Gửi token về server (BE)
-            const res = await fetch('http://ALB-save-driving-1470058884.ap-southeast-1.elb.amazonaws.com/api/v1/accounts/update-token', {
+            const res = await fetch(`${BASE_URL}/api/v1/accounts/update-token`, {
                 method: 'POST',
                 cache: "no-store",
                 headers: {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../styles/Notification.scss";
 import { getAllNotifications, markNotificationAsRead, deleteNotification, type NotificationItem } from "../firebase/firebase-messaging";
 
-
+const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 const Notification: React.FC = () => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +53,7 @@ const Notification: React.FC = () => {
             const vehiclePlateNumber = payload?.data?.vehiclePlateNumber;
             const xRequestId = crypto.randomUUID();
 
-            const res = await fetch(`http://26.186.182.141:8080/api/v1/verify/confirm-update-vehicle/${decision}`, {
+            const res = await fetch(`${BASE_URL}/api/v1/verify/confirm-update-vehicle/${decision}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

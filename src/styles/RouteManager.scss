@@ -1,8 +1,8 @@
-.trip-manager {
+.route-manager {
     padding: 32px;
 }
 
-.trip-table {
+.route-table {
     width: 100%;
     border-collapse: collapse;
     background: #fff;
@@ -12,17 +12,17 @@
     border: 2px solid #0099ff;
 }
 
-.trip-table th,
-.trip-table td {
+.route-table th,
+.route-table td {
     padding: 12px 16px;
     text-align: left;
 }
 
-.trip-table th {
+.route-table th {
     background: #f8f8f8;
     font-weight: bold;
 }
 
-.trip-table tr:not(:last-child) {
+.route-table tr:not(:last-child) {
     border-bottom: 1px solid #eee;
 }
