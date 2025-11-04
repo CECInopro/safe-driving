@@ -45,6 +45,7 @@ const VehicleManager: React.FC = () => {
             {selectedCar && (
                 <VehicleMapModal
                     vehicleId={selectedCar.vehicleId}
+                    deviceId={selectedCar.deviceId}
                     onClose={() => setSelectedCar(null)}
                 />
             )}

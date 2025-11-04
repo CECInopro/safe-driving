@@ -12,7 +12,7 @@ export const useRoutes = () => {
             setLoading(true);
             setError(null);
             try {
-                const res = await fetch(`http://localhost:8080/api/v1/routes`, {
+                const res = await fetch(`${BASE_URL}/api/v1/routes`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

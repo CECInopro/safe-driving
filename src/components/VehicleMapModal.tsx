@@ -4,10 +4,11 @@ import VehicleCamera from './VehicleCamera';
 
 type Props = {
     vehicleId: string;
+    deviceId: string;
     onClose: () => void;
 };
 
-const VehicleMapModal: React.FC<Props> = ({ vehicleId, onClose }) => {
+const VehicleMapModal: React.FC<Props> = ({ vehicleId, deviceId, onClose }) => {
     return (
         <div className="car-map-modal">
             <div className="car-map-modal__content" style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
@@ -16,7 +17,7 @@ const VehicleMapModal: React.FC<Props> = ({ vehicleId, onClose }) => {
                     <h3>Theo dõi xe ID: {vehicleId}</h3>
                     <VehicleMap vehicleId={vehicleId} />
                 </div>
-                <VehicleCamera vehicleId={vehicleId} />
+                <VehicleCamera vehicleId={deviceId} />
             </div>
         </div>
     );

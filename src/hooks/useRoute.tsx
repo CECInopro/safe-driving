@@ -40,7 +40,7 @@ export const useRoute = (routeId: string | null) => {
             setError(null);
             try {
 
-                const res = await fetch(`http://localhost:8080/api/v1/routes/${routeId}`, {
+                const res = await fetch(`${BASE_URL}/api/v1/routes/${routeId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

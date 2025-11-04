@@ -4,6 +4,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
 export type Vehicle = {
     vehicleId: string;
+    deviceId: string;
     plateNumber?: string;
     fullName?: string;
 };
@@ -40,6 +41,7 @@ export const useVehicles = () => {
                     vehicleId: v.vehicleId ?? v.id ?? v.vehicle_id,
                     plateNumber: v.plateNumber ?? v.plate ?? v.plate_number,
                     fullName: v.fullName ?? v.full_name ?? v.fullname ?? v.fullName ?? v.fullName,
+                    deviceId: v.deviceId ?? v.device_id ?? '',
                 })).filter((v: Vehicle) => !!v.vehicleId);
 
                 const uniqueVehicles = Array.from(

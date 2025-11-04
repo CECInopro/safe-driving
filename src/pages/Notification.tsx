@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Notification.scss";
-import { getAllNotifications, markNotificationAsRead, deleteNotification, type NotificationItem } from "../firebase/firebase-messaging";
+import { getAllNotifications, deleteNotification, type NotificationItem } from "../firebase/firebase-messaging";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 const Notification: React.FC = () => {
