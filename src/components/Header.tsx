@@ -12,6 +12,17 @@ const Header: React.FC = () => {
 
     return (
         <div className="header">
+            <button
+                className="header-menu-btn"
+                aria-label="Toggle sidebar"
+                onClick={() => {
+                    document.body.classList.toggle('sidebar-open');
+                }}
+            >
+                <span />
+                <span />
+                <span />
+            </button>
             <input type="text" placeholder="Tìm kiếm..." className="header-search" />
             <div className="header-user">
                 <img src="/images/avatar.png" alt="User Icon" className="header-user-icon" onClick={toggleDropdown} />
@@ -19,7 +30,7 @@ const Header: React.FC = () => {
                     <div className="header-dropdown">
                         <button onClick={() => navigate('/profile')} className="header-dropdown-item">Hồ sơ</button>
                         <button onClick={() => navigate('/settings')} className="header-dropdown-item">Cài đặt</button>
-                        <button onClick={() => navigate('/logout')} className="header-dropdown-item">Đăng xuất</button>
+                        <button onClick={() => navigate('/login')} className="header-dropdown-item">Đăng xuất</button>
                     </div>
                 )}
             </div>

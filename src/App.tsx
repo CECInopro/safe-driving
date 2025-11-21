@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import Welcome from './pages/Welcome';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -8,29 +9,70 @@ import UserManager from './pages/UserManager';
 import RouteManager from './pages/RouteManager';
 import VehicleManager from './pages/VehicleManager';
 import Notification from './pages/Notification';
-import 'leaflet/dist/leaflet.css';
 import DriverManager from './pages/DriverManager';
+import 'leaflet/dist/leaflet.css';
 
 function App() {
-    return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<Welcome />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+	return (
+		<Router>
+			<Routes>
+				<Route path="/" element={<Welcome />} />
+				<Route path="/login" element={<Login />} />
+				<Route path="/register" element={<Register />} />
 
-                {/* Routes dùng layout */}
-                <Route element={<HomeLayout />}>
-                    <Route path='/home' element={<Home />} />
-                    <Route path='/user-manager' element={<UserManager />} />
-                    <Route path='/route-manager' element={<RouteManager />} />
-                    <Route path='/vehicle-manager' element={<VehicleManager />} />
-                    <Route path='/driver-manager' element={<DriverManager />} />
-                    <Route path='/notification' element={<Notification />} />
-                </Route>
-            </Routes>
-        </Router>
-    );
+				<Route element={<HomeLayout />}>
+					<Route
+						path="/home"
+						element={
+							<ProtectedRoute>
+								<Home />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/user-manager"
+						element={
+							<ProtectedRoute requiredRole="admin">
+								<UserManager />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/driver-manager"
+						element={
+							<ProtectedRoute requiredRole='admin'>
+								<DriverManager />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/route-manager"
+						element={
+							<ProtectedRoute>
+								<RouteManager />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/vehicle-manager"
+						element={
+							<ProtectedRoute requiredRole='admin'>
+								<VehicleManager />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/notification"
+						element={
+							<ProtectedRoute requiredRole='admin'>
+								<Notification />
+							</ProtectedRoute>
+						}
+					/>
+				</Route>
+			</Routes>
+		</Router>
+	);
 }
 
 export default App;

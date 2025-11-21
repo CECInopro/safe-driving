@@ -75,3 +75,46 @@
 .header-dropdown-item:hover {
     background: rgba(255, 114, 8, 0.12);
 }
+
+/* mobile: hiển thị nút menu và tối ưu ô tìm kiếm */
+.header-menu-btn {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    background: transparent;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px;
+
+    span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: #fff;
+        border-radius: 2px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        gap: 10px;
+    }
+    .header-menu-btn {
+        display: inline-flex;
+    }
+    .header-search {
+        flex: 1;
+        width: 100%;
+        max-width: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .header-search {
+        display: none;
+    }
+}

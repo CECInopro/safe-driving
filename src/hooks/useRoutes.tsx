@@ -1,24 +1,35 @@
 import { useEffect, useState } from 'react';
 import { type Route } from './useRoute';
+import { useAuth } from '../contexts/AuthContext';
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
 export const useRoutes = () => {
     const [routes, setRoutes] = useState<Route[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const { token } = useAuth();
 
     useEffect(() => {
+        if (!token) {
+            setRoutes([]);
+            return;
+        }
+
         const fetchRoutes = async () => {
             setLoading(true);
             setError(null);
             try {
+                const headers: Record<string, string> = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'xRequestId': crypto.randomUUID(),
+                };
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
                 const res = await fetch(`${BASE_URL}/api/v1/routes`, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'xRequestId': crypto.randomUUID(),
-                    },
+                    headers,
                 });
                 if (!res.ok) throw new Error(`Fetch routes failed: ${res.status}`);
                 const raw = await res.json();
@@ -52,7 +63,7 @@ export const useRoutes = () => {
             }
         };
         fetchRoutes();
-    }, []);
+    }, [token]);
 
     return { routes, loading, error };
 };

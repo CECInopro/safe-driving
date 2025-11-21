@@ -14,7 +14,8 @@ const VehicleManager: React.FC = () => {
             <table className="car-table">
                 <thead>
                     <tr>
-                        <th>Vehicle ID</th>
+                        <th>Code</th>
+                        <th>Tên</th>
                         <th>Biển số xe</th>
                         <th>Người lái</th>
                         <th></th>
@@ -32,9 +33,10 @@ const VehicleManager: React.FC = () => {
                     )}
                     {!loading && !error && vehicles.map((car) => (
                         <tr key={car.vehicleId}>
-                            <td style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis' }}>{car.vehicleId}</td>
+                            <td style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis' }}>{car.code}</td>
+                            <td>{car.name}</td>
                             <td>{car.plateNumber || '-'}</td>
-                            <td>{car.fullName || '-'}</td>
+                            <td>{car.driver || '-'}</td>
                             <td>
                                 <FaEye style={{ cursor: 'pointer' }} onClick={() => setSelectedCar(car)} />
                             </td>
@@ -44,6 +46,7 @@ const VehicleManager: React.FC = () => {
             </table>
             {selectedCar && (
                 <VehicleMapModal
+                    plateNumber={selectedCar.plateNumber || ''}
                     vehicleId={selectedCar.vehicleId}
                     deviceId={selectedCar.deviceId}
                     onClose={() => setSelectedCar(null)}

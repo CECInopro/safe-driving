@@ -1,5 +1,9 @@
 .car-manager {
     padding: 32px;
+
+    @media (max-width: 768px) {
+        padding: 12px;
+    }
 }
 
 .car-table {
@@ -7,7 +11,7 @@
     border-collapse: collapse;
     background: #fff;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     border: 2px solid #0099ff;
 }
@@ -16,6 +20,11 @@
 .car-table td {
     padding: 12px 16px;
     text-align: left;
+
+    @media (max-width: 768px) {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
 }
 
 .car-table th {
@@ -38,29 +47,256 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 20px;
+
+    @media (max-width: 768px) {
+        padding: 0;
+        align-items: flex-end;
+    }
 }
 
 .car-map-modal__content {
     background: #fff;
-    padding: 24px;
     border-radius: 8px;
-    min-width: 400px;
+    width: 50%;
+    max-width: 1400px;
+    height: 90vh;
+    max-height: 900px;
+    display: flex;
+    flex-direction: column;
     position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+    @media (max-width: 768px) {
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 16px 16px 0 0;
+    }
+}
+
+.car-map-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
+    flex-shrink: 0;
+
+    @media (max-width: 768px) {
+        padding: 16px;
+    }
+}
+
+.car-map-modal__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+
+    @media (max-width: 768px) {
+        font-size: 16px;
+    }
 }
 
 .car-map-modal__close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
     background: #FF7208;
     color: #fff;
     border: none;
     border-radius: 4px;
-    padding: 4px 12px;
+    padding: 8px 16px;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    min-width: 44px;
+    min-height: 44px;
+
+    &:hover {
+        background: #e6650a;
+    }
+
+    &:active {
+        background: #cc5a08;
+    }
+
+    @media (max-width: 768px) {
+        padding: 10px 14px;
+        font-size: 12px;
+    }
 }
 
-// Status badges
+.car-map-modal__body {
+    display: flex;
+    gap: 20px;
+    padding: 20px 24px;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    align-items: stretch;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 0;
+        padding: 0;
+        min-height: auto;
+        align-items: auto;
+    }
+}
+
+.car-map-modal__map-section {
+    flex: 1 1 auto;
+    width: 50%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .car-map-modal__map-section {
+        flex: 0 0 auto;
+        width: 100%;
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+        min-height: 300px;
+    }
+}
+
+.car-map-modal__map-header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+    min-height: 40px;
+    margin-bottom: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-size: 13px;
+    color: #666;
+
+    @media (max-width: 768px) {
+        margin-bottom: 8px;
+    }
+}
+
+.car-map-modal__map-label {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+    @media (max-width: 768px) {
+        font-size: 12px;
+    }
+}
+
+.car-map-modal__map-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    overflow: visible !important;
+    background: #f5f5f5;
+
+    // Leaflet map container
+    .leaflet-container {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    @media (max-width: 768px) {
+        border-radius: 4px;
+    }
+}
+
+.car-map-modal__camera-section {
+    flex: 1 1 auto;
+    width: 50%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+        flex: 1;
+        width: 100%;
+        padding: 12px;
+        min-height: 0;
+    }
+}
+
+.vehicle-camera {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+
+    @media (max-width: 768px) {
+        height: auto;
+        flex: 1;
+    }
+}
+
+.camera-viewer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+        height: auto;
+        flex: 1;
+        gap: 8px;
+
+        >div:first-child {
+            display: none;
+        }
+
+        >div:last-child {
+            flex: 1;
+            min-height: 300px;
+            height: 100%;
+        }
+    }
+}
+
+.camera-viewer__header {
+    height: 40px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+.camera-viewer__canvas-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    width: 100%;
+    height: 110%;
+    box-sizing: border-box;
+
+    canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border-radius: 4px;
+    }
+}
+
+
 .status-badge {
     display: inline-block;
     padding: 4px 8px;
@@ -68,31 +304,31 @@
     font-size: 12px;
     font-weight: 500;
     text-transform: uppercase;
-    
+
     &.status-active {
         background-color: #d4edda;
         color: #155724;
         border: 1px solid #c3e6cb;
     }
-    
+
     &.status-inactive {
         background-color: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c6cb;
     }
-    
+
     &.status-maintenance {
         background-color: #fff3cd;
         color: #856404;
         border: 1px solid #ffeaa7;
     }
-    
+
     &.status-offline {
         background-color: #e2e3e5;
         color: #383d41;
         border: 1px solid #d6d8db;
     }
-    
+
     &.status-unknown {
         background-color: #f8f9fa;
         color: #6c757d;

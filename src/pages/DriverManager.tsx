@@ -1,114 +1,125 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/DriverManager.scss";
+import { useDrivers, type Driver } from "../hooks/useDrivers";
+import CreateDriverForm from "../components/CreateDriverForm";
+import EditDriverForm from "../components/EditDriverForm";
 import { useMqtt } from "../hooks/useMqtt";
-import { useDrivers } from "../hooks/useDrivers";
 
-const TOPIC_PUB = "esp32/write_card";
-const TOPIC_SUB = "esp32/write_status";
+const TOPIC_PUB = "esp32/write";
+const TOPIC_SUB = "esp32/status";
 
 const DriverManager: React.FC = () => {
     // Hooks
-    const { drivers, vehicles, loading, error, createDriver } = useDrivers();
-    const [waitingCard, setWaitingCard] = useState(false);
+    const { drivers, vehicles, loading, error, updateDriver, deleteDriver } = useDrivers();
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [showForm, setShowForm] = useState(false);
+    const [editingDriver, setEditingDriver] = useState<Driver | null>(null);
+    const [deletingDriverId, setDeletingDriverId] = useState<string | null>(null);
+    const [scanningDriverId, setScanningDriverId] = useState<string | null>(null);
     const [cardMessage, setCardMessage] = useState("");
-    const waitingCardRef = useRef(waitingCard);
+    const scanningRef = useRef(false);
 
-    // Cập nhật ref khi waitingCard thay đổi
+    // Cập nhật ref khi scanningDriverId thay đổi
     useEffect(() => {
-        waitingCardRef.current = waitingCard;
-    }, [waitingCard]);
+        scanningRef.current = scanningDriverId !== null;
+    }, [scanningDriverId]);
 
     const { isConnected, publish } = useMqtt({
         topicPub: TOPIC_PUB,
         topicSub: TOPIC_SUB,
         onMessage: (_topic, message) => {
-            if (waitingCardRef.current) {
-                if (/WRITE_SUCCESS|OK/i.test(message)) {
-                    setCardMessage("✅ Ghi thẻ thành công!");
+            console.log("📩 Nhận message từ MQTT:", message);
+            if (scanningRef.current) {
+                // Chỉ hiện "thành công" khi nhận được "✅ Ghi dữ liệu thành công!" từ ESP32
+                // Không phải "✅ Dữ liệu nhận thành công. Chạm thẻ để ghi!"
+                if (/✅.*Ghi.*thành công|✅ Ghi dữ liệu thành công/i.test(message)) {
+                    setCardMessage("✅ Quét thẻ thành công!");
                     setTimeout(() => {
-                        setWaitingCard(false);
+                        setScanningDriverId(null);
                         setCardMessage("");
                     }, 2000);
-                } else if (/WRITE_FAIL|ERROR/i.test(message)) {
-                    setCardMessage("❌ Ghi thẻ thất bại, vui lòng thử lại.");
+                } else if (/❌.*Ghi.*thất bại|❌ Ghi dữ liệu thất bại/i.test(message)) {
+                    setCardMessage("❌ Quét thẻ thất bại, vui lòng thử lại.");
+                } else if (message.includes("Chạm thẻ") || message.includes("chạm thẻ") || message.includes("Dữ liệu nhận thành công")) {
+                    // ESP32 yêu cầu chạm thẻ hoặc xác nhận đã nhận dữ liệu
+                    setCardMessage("🪪 " + message);
                 } else {
+                    // Hiển thị các message khác
                     setCardMessage(message);
                 }
             }
         },
     });
 
-    // Local state
-    const [selectedVehicle, setSelectedVehicle] = useState("");
-    const [formError, setFormError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-    // Form state
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [dateOfBirth, setDateOfBirth] = useState("");
-    const [gender, setGender] = useState("Male");
-    const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
-    const [hireDate, setHireDate] = useState("");
-    const [baseSalary, setBaseSalary] = useState<string>("1500.0");
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [submitting, setSubmitting] = useState(false);
-    const [showForm, setShowForm] = useState(false);
-    const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
-
-    // ===== Submit create driver =====
-    const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setSubmitting(true);
-        setFormError(null);
-
-        const result = await createDriver({
-            firstName,
-            lastName,
-            dateOfBirth,
-            gender,
-            email,
-            phone,
-            hireDate,
-            baseSalary,
-            plateNumber: selectedVehicle,
-            imageFile,
-        });
-
-        if (result.success) {
-            setSuccessMessage("Tạo tài xế thành công.");
-
-            // ===== Gửi MQTT yêu cầu ghi thẻ =====
-            if (isConnected && result.data) {
-                const driverId = result.data?.id || result.data?.driverId;
-                if (driverId && publish(driverId.toString())) {
-                    setWaitingCard(true);
-                    setCardMessage("🪪 Vui lòng chạm thẻ vào đầu đọc...");
-                }
-            }
-
-            // Reset form
-            setShowForm(false);
-            setFirstName("");
-            setLastName("");
-            setDateOfBirth("");
-            setGender("Male");
-            setEmail("");
-            setPhone("");
-            setHireDate("");
-            setBaseSalary("1500.0");
-            setImageFile(null);
-            setSelectedImageUrl(null);
-            setSelectedVehicle("");
-        } else {
-            setFormError(result.error || "Không thể tạo tài xế");
+    const handleDelete = async (driverId: string) => {
+        if (!window.confirm("Bạn có chắc chắn muốn xóa tài xế này?")) {
+            return;
         }
 
-        setSubmitting(false);
+        setDeletingDriverId(driverId);
+        const result = await deleteDriver(driverId);
+
+        if (result.success) {
+            setSuccessMessage("Xóa tài xế thành công.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } else {
+            alert(result.error || "Không thể xóa tài xế");
+        }
+
+        setDeletingDriverId(null);
     };
 
-    // ===== UI =====
+    const handleUpdate = async (driverId: string, driverData: {
+        firstName?: string;
+        lastName?: string;
+        dateOfBirth?: string;
+        gender?: string;
+        email?: string;
+        phone?: string;
+        hireDate?: string;
+        baseSalary?: string;
+        vehicleId?: string;
+        imageFile?: File | null;
+        currentImageUrl?: string;
+    }) => {
+        const result = await updateDriver(driverId, driverData);
+
+        if (result.success) {
+            setSuccessMessage("Cập nhật tài xế thành công.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+            setEditingDriver(null);
+        } else {
+            alert(result.error || "Không thể cập nhật tài xế");
+        }
+    };
+    const getCurrentVehicle = (driver: Driver) => {
+        if (!driver.vehicleId) return null;
+        return vehicles.find(v => v.id === driver.vehicleId);
+    };
+
+    // Xử lý quét thẻ
+    const handleScanCard = (driverId: string) => {
+        console.log("🔍 handleScanCard called with driverId:", driverId);
+        console.log("🔍 isConnected:", isConnected);
+        console.log("🔍 TOPIC_PUB:", TOPIC_PUB);
+        
+        if (!isConnected) {
+            alert("MQTT chưa kết nối. Vui lòng thử lại sau.");
+            return;
+        }
+        
+        const result = publish(driverId);
+        console.log("🔍 publish result:", result);
+        
+        if (result) {
+            console.log("📤 Đã gửi driverId cho MQTT:", driverId, "vào topic:", TOPIC_PUB);
+            setScanningDriverId(driverId);
+            setCardMessage("🪪 Vui lòng quét thẻ trên màn hình...");
+        } else {
+            alert("Không thể gửi yêu cầu quét thẻ. Vui lòng thử lại.");
+        }
+    };
+
     return (
         <div className="driver-manager">
             <h2>Quản lý tài xế</h2>
@@ -116,138 +127,99 @@ const DriverManager: React.FC = () => {
 
             {successMessage && <div className="alert-success">{successMessage}</div>}
             {error && !showForm && <div className="alert-error">{error}</div>}
-            {formError && showForm && <div className="alert-error">{formError}</div>}
 
             {/* ===== Form tạo tài xế ===== */}
             {showForm && (
-                <div className="driver-form-modal" onClick={() => setShowForm(false)}>
-                    <form className="driver-form" onClick={(e) => e.stopPropagation()} onSubmit={onSubmit}>
-                        <div>
-                            <label>Họ</label>
-                            <input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-                        </div>
-                        <div>
-                            <label>Tên</label>
-                            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-                        </div>
-                        <div>
-                            <label>Ngày sinh</label>
-                            <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
-                        </div>
-                        <div>
-                            <label>Giới tính</label>
-                            <select value={gender} onChange={(e) => setGender(e.target.value)}>
-                                <option value="Male">Nam</option>
-                                <option value="Female">Nữ</option>
-                                <option value="Other">Khác</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Email</label>
-                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                        </div>
-                        <div>
-                            <label>SĐT</label>
-                            <input value={phone} onChange={(e) => setPhone(e.target.value)} />
-                        </div>
-                        <div>
-                            <label>Ngày tuyển</label>
-                            <input type="date" value={hireDate} onChange={(e) => setHireDate(e.target.value)} />
-                        </div>
-                        <div>
-                            <label>Lương cơ bản</label>
-                            <input type="number" step="0.01" value={baseSalary} onChange={(e) => setBaseSalary(e.target.value)} />
-                        </div>
-
-                        <div>
-                            <label>Xe được gán</label>
-                            <select
-                                value={selectedVehicle}
-                                onChange={(e) => setSelectedVehicle(e.target.value)}
-                                required
-                            >
-                                <option value="">-- Chọn xe --</option>
-                                {vehicles.map((v) => (
-                                    <option key={v.id} value={v.plateNumber || v.licensePlate || ""}>
-                                        {v.plateNumber || v.licensePlate || `Xe ${v.id}`}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label>Ảnh</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0] || null;
-                                    setImageFile(file);
-                                    if (file) {
-                                        const previewUrl = URL.createObjectURL(file);
-                                        setSelectedImageUrl(previewUrl);
-                                    } else {
-                                        setSelectedImageUrl(null);
-                                    }
-                                }}
-                            />
-                            {selectedImageUrl && (
-                                <div className="image-preview">
-                                    <img
-                                        src={selectedImageUrl}
-                                        alt="Preview"
-                                    />
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="form-actions">
-                            <button type="button" onClick={() => setShowForm(false)}>Hủy</button>
-                            <button type="submit" disabled={submitting}>
-                                {submitting ? "Đang tạo..." : "Tạo tài xế"}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <CreateDriverForm
+                    onSuccess={() => {
+                        setShowForm(false);
+                        setSuccessMessage("Tạo tài xế thành công.");
+                        setTimeout(() => setSuccessMessage(null), 3000);
+                    }}
+                    onCancel={() => setShowForm(false)}
+                />
             )}
-
-            {/* ===== Bảng danh sách ===== */}
             <table className="driver-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Ảnh</th>
                         <th>Họ tên</th>
+                        <th>Xe đang lái</th>
                         <th>Email</th>
                         <th>SĐT</th>
                         <th>Ngày sinh</th>
                         <th>Ngày tuyển</th>
                         <th>Lương</th>
+                        <th>Hoạt động</th>
                     </tr>
                 </thead>
                 <tbody>
                     {loading && <tr><td colSpan={8}>Đang tải...</td></tr>}
                     {!loading && drivers.length === 0 && <tr><td colSpan={8}>Không có dữ liệu</td></tr>}
-                    {!loading && drivers.map((d) => (
-                        <tr key={d.id}>
-                            <td>{d.id}</td>
-                            <td>{d.imageUrl ? <img src={d.imageUrl} alt="avatar" width={50} height={50} /> : "No img"}</td>
-                            <td>{[d.lastName, d.firstName].filter(Boolean).join(" ")}</td>
-                            <td>{d.email}</td>
-                            <td>{d.phone}</td>
-                            <td>{d.dateOfBirth}</td>
-                            <td>{d.hireDate}</td>
-                            <td>{d.baseSalary}</td>
-                        </tr>
-                    ))}
+                    {!loading && drivers.map((d) => {
+                        const currentVehicle = getCurrentVehicle(d);
+                        return (
+                            <tr key={d.id}>
+                                <td>{d.urlImage ? <img src={d.urlImage} alt="avatar" width={50} height={50} /> : "No img"}</td>
+                                <td>{[d.lastName, d.firstName].filter(Boolean).join(" ")}</td>
+                                <td>
+                                    {currentVehicle
+                                        ? (currentVehicle.plateNumber || currentVehicle.licensePlate || `Xe ${currentVehicle.id}`)
+                                        : "Chưa gán xe"}
+                                </td>
+                                <td>{d.email}</td>
+                                <td>{d.phone}</td>
+                                <td>{d.dateOfBirth}</td>
+                                <td>{d.hireDate}</td>
+                                <td>{d.baseSalary}</td>
+                                <td>
+                                    <button
+                                        className="btn btn--small"
+                                        onClick={() => setEditingDriver(d)}
+                                    >
+                                        Sửa
+                                    </button>
+                                    <button
+                                        className="btn btn--small btn--danger"
+                                        style={{ marginLeft: 8 }}
+                                        onClick={() => handleDelete(d.id)}
+                                        disabled={deletingDriverId === d.id}
+                                    >
+                                        {deletingDriverId === d.id ? "Đang xóa..." : "Xóa"}
+                                    </button>
+                                    <button
+                                        className="btn btn--small"
+                                        style={{ marginLeft: 8 }}
+                                        onClick={() => handleScanCard(d.id)}
+                                        disabled={scanningDriverId === d.id}
+                                    >
+                                        Quét thẻ
+                                    </button>
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
 
-            {/* ===== Overlay chạm thẻ ===== */}
-            {waitingCard && (
+            {/* ===== Form sửa tài xế ===== */}
+            {editingDriver && (
+                <EditDriverForm
+                    driver={editingDriver}
+                    vehicles={vehicles}
+                    onSuccess={() => {
+                        setEditingDriver(null);
+                    }}
+                    onCancel={() => setEditingDriver(null)}
+                    onUpdate={handleUpdate}
+                />
+            )}
+
+            {/* ===== Overlay quét thẻ ===== */}
+            {scanningDriverId && (
                 <div className="overlay">
                     <div className="overlay-box">
-                        <h3>{cardMessage}</h3>
+                        <h3>{cardMessage || "🪪 Vui lòng quét thẻ trên màn hình..."}</h3>
                     </div>
                 </div>
             )}

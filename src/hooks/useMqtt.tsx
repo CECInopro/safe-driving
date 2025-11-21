@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import mqtt from "mqtt";
 
-const MQTT_URL = import.meta.env.VITE_MQTT_URL || "wss://broker.emqx.io:8084/mqtt";
-const MQTT_USER = import.meta.env.VITE_MQTT_USER || "";
-const MQTT_PASS = import.meta.env.VITE_MQTT_PASS || "";
+const MQTT_URL = import.meta.env.VITE_MQTT_URL || "wss://8f3867bbff29467db818d8c01ceb8a7b.s1.eu.hivemq.cloud:8884/mqtt";
+const MQTT_USER = import.meta.env.VITE_MQTT_USER || "10112003dtc";
+const MQTT_PASS = import.meta.env.VITE_MQTT_PASS || "10112003Dtc";
 
 export type MqttOptions = {
     topicPub?: string;
@@ -12,7 +12,7 @@ export type MqttOptions = {
 };
 
 export const useMqtt = (options: MqttOptions = {}) => {
-    const { topicPub = "esp32/write_card", topicSub = "esp32/write_status", onMessage } = options;
+    const { topicPub = "esp32/write", topicSub = "esp32/status", onMessage } = options;
     const [client, setClient] = useState<mqtt.MqttClient | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const onMessageRef = useRef(onMessage);
@@ -34,37 +34,41 @@ export const useMqtt = (options: MqttOptions = {}) => {
         const mqttClient = mqtt.connect(MQTT_URL, mqttOptions);
 
         mqttClient.on("connect", () => {
-            console.log("✅ MQTT connected");
+            console.log("✅ MQTT Connected!");
             setIsConnected(true);
-            mqttClient.subscribe(topicSub, { qos: 0 });
+            mqttClient.subscribe(topicSub);
+            console.log("📡 Subscribed to:", topicSub);
+        });
+
+        mqttClient.on("error", (err) => {
+            console.error("❌ MQTT Error:", err);
         });
 
         mqttClient.on("message", (topic, message) => {
             const msg = message.toString();
-            console.log("📩 MQTT message:", topic, msg);
+            console.log("📩 Nhận:", topic, msg);
             
             if (onMessageRef.current) {
                 onMessageRef.current(topic, msg);
             }
         });
 
-        mqttClient.on("error", (err) => {
-            console.error("❌ MQTT error:", err);
-            mqttClient.end();
-        });
-
         setClient(mqttClient);
 
         return () => {
-            mqttClient.end();
+            if (mqttClient) {
+                mqttClient.end();
+            }
         };
     }, [topicSub]);
 
     const publish = (message: string) => {
         if (client && isConnected) {
+            console.log("📤 Gửi:", message, "vào topic:", topicPub);
             client.publish(topicPub, message);
             return true;
         }
+        console.error("❌ Không thể gửi: client hoặc connection không sẵn sàng");
         return false;
     };
 

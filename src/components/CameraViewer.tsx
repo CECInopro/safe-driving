@@ -113,21 +113,19 @@ const CameraViewer: React.FC<Props> = ({ wsUrl, autoStart = false }) => {
     }, []);
 
     return (
-        <div className="camera-viewer" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div style={{ fontSize: 13 }}>{isConnected ? '✅ Connected' : '⏳ Disconnected'}</div>
-                <div style={{ marginLeft: 'auto', fontSize: 13 }}>FPS: {fps}</div>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { setErrorMessage(null); setRunning(true); }} disabled={running}>Start</button>
-                <button onClick={() => setRunning(false)} disabled={!running}>Stop</button>
+        <div className="camera-viewer" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div className="camera-viewer__header" style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0, minHeight: '40px', marginBottom: '8px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSize: '13px', color: '#666' }}>
+                <div>{isConnected ? '✅ Connected' : '⏳ Disconnected'}</div>
+                <button onClick={() => { setErrorMessage(null); setRunning(true); }} disabled={running} style={{ padding: '4px 12px', fontSize: '13px', fontFamily: 'inherit' }}>Start</button>
+                <button onClick={() => setRunning(false)} disabled={!running} style={{ padding: '4px 12px', fontSize: '13px', fontFamily: 'inherit' }}>Stop</button>
+                <div style={{ marginLeft: 'auto' }}>FPS: {fps}</div>
             </div>
             {errorMessage && (
-                <div style={{ color: '#d32f2f', fontSize: 12 }}>
+                <div style={{ color: '#d32f2f', fontSize: 12, flexShrink: 0, marginBottom: 8 }}>
                     {errorMessage}
                 </div>
             )}
-            <div style={{ width: '100%', aspectRatio: '9/10', background: '#000', borderRadius: 0, overflow: 'hidden' }}>
+            <div className="camera-viewer__canvas-container" style={{ width: '100%', flex: 1, minHeight: 0, background: '#000', borderRadius: 4, overflow: 'hidden' }}>
                 <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
             </div>
         </div>

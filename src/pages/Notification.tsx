@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Notification.scss";
 import { getAllNotifications, deleteNotification, type NotificationItem } from "../firebase/firebase-messaging";
+import { useAuth } from "../contexts/AuthContext";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 const Notification: React.FC = () => {
@@ -8,6 +9,7 @@ const Notification: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const { token } = useAuth();
 
     useEffect(() => {
         const loadNotifications = () => {
@@ -47,6 +49,12 @@ const Notification: React.FC = () => {
         setErrorMessage(null);
         setSuccessMessage(null);
 
+        if (!token) {
+            setErrorMessage("Bạn cần đăng nhập lại để phản hồi.");
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
             const payload = notification.payload;
             const deviceId = payload?.data?.deviceId;
@@ -58,6 +66,7 @@ const Notification: React.FC = () => {
                 headers: {
                     "Content-Type": "application/json",
                     "xRequestId": xRequestId,
+                    "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     deviceId,

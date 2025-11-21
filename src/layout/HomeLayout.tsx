@@ -19,7 +19,13 @@ const HomeLayout: React.FC = () => {
     return (
         <div style={{ display: "flex" }}>
             <Sidebar />
-            <div style={{ flex: 1, background: "#230505", height: "100vh", overflowY: "auto" }}>
+            <div
+                className="sidebar-backdrop"
+                onClick={() => {
+                    document.body.classList.remove('sidebar-open');
+                }}
+            />
+            <div style={{ flex: 1, background: "#230505", minHeight: "100dvh", overflowY: "auto" }}>
                 <Header />
                 <Outlet />
             </div>

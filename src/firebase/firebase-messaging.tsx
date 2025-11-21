@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage, type MessagePayload } from "firebase/messaging";
 import type { NavigateFunction } from "react-router-dom";
+import { AUTH_STORAGE_KEY } from "../contexts/AuthContext";
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
 const firebaseConfig = {
@@ -25,15 +26,28 @@ export const initNotification = async () => {
         if (token) {
             const xRequestId = crypto.randomUUID();
             // 👇 Gửi token về server (BE)
-            const res = await fetch(`${BASE_URL}/api/v1/accounts/update-token`, {
-                method: 'POST',
+            let authToken: string | null = null;
+            try {
+                const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    authToken = parsed?.token ?? null;
+                }
+                console.log("Đã lấy token đăng nhập từ localStorage.");
+            } catch (error) {
+                console.warn("Không thể đọc token đăng nhập:", error);
+            }
+
+            const accountId = "g50e8400-e29b-41d4-a716-446655440001";
+            const res = await fetch(`${BASE_URL}/api/v1/accounts/${accountId}/token`, {
+                method: 'PATCH',
                 cache: "no-store",
                 headers: {
                     'Content-Type': 'application/json',
-                    "xRequestId": xRequestId,
+                    "x-request-id": xRequestId,
+                    ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
                 },
                 body: JSON.stringify({
-                    id: "g50e8400-e29b-41d4-a716-446655440001",
                     token: token
                 }),
             });

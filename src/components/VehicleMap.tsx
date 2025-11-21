@@ -63,7 +63,7 @@ const Routing: React.FC<RoutingProps> = ({ waypoints }) => {
             // Ẩn control panel (có thể bật lại nếu muốn)
             addWaypoints: false,
             fitSelectedRoutes: true,
-            show: false, // Ẩn control panel
+            show: false,
         }).addTo(map);
 
         return () => {
@@ -78,9 +78,15 @@ const Routing: React.FC<RoutingProps> = ({ waypoints }) => {
 };
 
 const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
-    // Hooks must be called unconditionally, but we'll only use one based on props
     const vehicleData = useVehicleLocation(vehicleId || '');
     const routeData = useRoute(routeId || null);
+    const vehicleMarkerRef = useRef<L.Marker | null>(null);
+
+    useEffect(() => {
+        if (vehicleId && vehicleMarkerRef.current && vehicleData?.location) {
+            vehicleMarkerRef.current.openPopup();
+        }
+    }, [vehicleId, vehicleData?.location]);
 
     // Handle vehicle mode
     if (vehicleId) {
@@ -102,14 +108,17 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
             <MapContainer
                 center={location.position}
                 zoom={15}
-                style={{ width: '100%', height: 480, marginTop: 12 }}
+                style={{ width: '100%', height: 480 }}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                <Marker position={location.position}>
+                <Marker
+                    position={location.position}
+                    ref={vehicleMarkerRef}
+                >
                     <Popup>
                         <div>
                             <div>Xe ID: {vehicleId}</div>
@@ -159,35 +168,28 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
         }
 
         const stops = route.stops.sort((a: Stop, b: Stop) => a.order - b.order);
-
-        // Calculate center
         const avgLat = stops.reduce((sum: number, s: Stop) => sum + s.lat, 0) / stops.length;
         const avgLng = stops.reduce((sum: number, s: Stop) => sum + s.lng, 0) / stops.length;
         const center: [number, number] = [avgLat, avgLng];
 
-        // Convert stops to LatLng array for routing
         const waypoints: L.LatLng[] = stops.map((s: Stop) =>
             L.latLng(s.lat, s.lng)
         );
 
-        // Determine zoom
         const zoom = stops.length === 1 ? 15 : stops.length <= 3 ? 12 : 10;
 
         return (
             <MapContainer
                 center={center}
                 zoom={zoom}
-                style={{ width: '100%', height: 480, marginTop: 12 }}
+                style={{ width: '100%', height: 480 }}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {/* Sử dụng Routing component thay vì Polyline */}
                 <Routing waypoints={waypoints} />
-
-                {/* Markers for each stop */}
                 {stops.map((stop: Stop, index: number) => (
                     <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
                         <Popup>

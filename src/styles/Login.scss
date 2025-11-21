@@ -85,6 +85,12 @@
     transform: translateY(-2px);
 }
 
+.login-button:disabled {
+    background: rgba(255, 140, 66, 0.7);
+    cursor: not-allowed;
+    transform: none;
+}
+
 .login-register {
     background: #fff;
     color: #ff7208;
@@ -95,4 +101,35 @@
     background: #ff7208;
     color: #fff;
     transform: translateY(-2px);
+}
+
+/* mobile */
+@media (max-width: 1024px) {
+    .login-container {
+        flex-direction: column;
+        width: min(90%, 420px);
+        height: auto;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .login-logo {
+        max-width: 160px;
+        height: 160px;
+    }
+
+    .login-form {
+        width: 100%;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-form {
+        padding: 1.25rem;
+    }
+
+    .login-title {
+        font-size: 1.6rem;
+    }
 }

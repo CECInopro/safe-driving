@@ -78,6 +78,7 @@ const UserManager = () => {
                                 <td>
                                     <button className="btn btn--small">Sửa</button>
                                     <button className="btn btn--small btn--danger" style={{ marginLeft: 8 }}>Xóa</button>
+
                                 </td>
                             </tr>
                         ))}

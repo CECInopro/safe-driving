@@ -1,30 +1,43 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
 export type Vehicle = {
     vehicleId: string;
     deviceId: string;
+    code: string;
+    name: string;
+    driver: string;
     plateNumber?: string;
-    fullName?: string;
 };
 
 export const useVehicles = () => {
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const { token } = useAuth();
 
     useEffect(() => {
+        if (!token) {
+            setVehicles([]);
+            return;
+        }
+
         const fetchVehicles = async () => {
             setLoading(true);
             setError(null);
             try {
+                const headers: Record<string, string> = {
+                    'Content-type': 'application/json',
+                    'xRequestId': crypto.randomUUID(),
+                };
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
                 const res = await fetch(`${BASE_URL}/api/v1/vehicles`, {
                     method: 'GET',
-                    headers: {
-                        'Content-type': 'application/json',
-                        'xRequestId': crypto.randomUUID(),
-                    },
+                    headers,
                 });
                 if (!res.ok) throw new Error(`Fetch vehicles failed: ${res.status}`);
                 const raw = await res.json();
@@ -38,10 +51,11 @@ export const useVehicles = () => {
                             : [];
 
                 const normalized: Vehicle[] = list.map((v: any) => ({
-                    vehicleId: v.vehicleId ?? v.id ?? v.vehicle_id,
-                    plateNumber: v.plateNumber ?? v.plate ?? v.plate_number,
-                    fullName: v.fullName ?? v.full_name ?? v.fullname ?? v.fullName ?? v.fullName,
-                    deviceId: v.deviceId ?? v.device_id ?? '',
+                    vehicleId: v.vehicleId,
+                    plateNumber: v.plateNumber,
+                    name: v.name,
+                    code: v.code,
+                    driver: Array.isArray(v.drivers) && v.drivers.length > 0 ? v.drivers[0].fullName : `${v.driverFirstName || ''} ${v.driverLastName || ''}`.trim(),
                 })).filter((v: Vehicle) => !!v.vehicleId);
 
                 const uniqueVehicles = Array.from(
@@ -56,7 +70,7 @@ export const useVehicles = () => {
             }
         };
         fetchVehicles();
-    }, []);
+    }, [token]);
 
     return { vehicles, loading, error };
 };

@@ -58,6 +58,8 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
 }
 
 .driver-form {
@@ -67,9 +69,12 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     min-width: 420px;
     max-width: 98vw;
+    max-height: 90vh;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px 24px;
+    overflow-y: auto;
+    margin: auto;
 }
 
 .driver-form label {
@@ -150,7 +155,7 @@
     font-weight: 500;
 }
 
-.driver-manager > button {
+.driver-manager>button {
     background: #1976d2;
     color: #fff;
     border: none;
@@ -201,7 +206,7 @@
     }
 }
 
-.driver-form > div {
+.driver-form>div {
     display: flex;
     flex-direction: column;
 }

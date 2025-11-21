@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
 export type Stop = {
@@ -26,6 +27,7 @@ export const useRoute = (routeId: string | null) => {
     const [route, setRoute] = useState<Route | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const { token } = useAuth();
 
     useEffect(() => {
         if (!routeId) {
@@ -35,18 +37,26 @@ export const useRoute = (routeId: string | null) => {
             return;
         }
 
+        if (!token) {
+            return;
+        }
+
         const fetchRoute = async () => {
             setLoading(true);
             setError(null);
             try {
 
+                const headers: Record<string, string> = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'xRequestId': crypto.randomUUID(),
+                };
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
                 const res = await fetch(`${BASE_URL}/api/v1/routes/${routeId}`, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'xRequestId': crypto.randomUUID(),
-                    },
+                    headers,
                 });
 
                 if (!res.ok) {
@@ -54,15 +64,12 @@ export const useRoute = (routeId: string | null) => {
                 }
 
                 const raw = await res.json();
-                // Response format: { success, message, data: { routeId, ..., stop: [...] } }
                 const payload = raw?.data ?? raw;
 
                 if (!payload) {
                     throw new Error('Route data not found');
                 }
 
-                // Normalize route data
-                // Note: API returns field "stop" (singular) not "stops" for single route endpoint
                 const normalized: Route = {
                     routeId: payload.routeId ?? payload.id ?? payload.route_id ?? routeId,
                     routeName: payload.routeName ?? payload.route_name ?? '',
@@ -94,7 +101,7 @@ export const useRoute = (routeId: string | null) => {
         };
 
         fetchRoute();
-    }, [routeId]);
+    }, [routeId, token]);
 
     return { route, loading, error };
 };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
@@ -13,8 +14,17 @@ export const useVehicleLocation = (vehicleId: string, intervalMs: number = 3000)
     const [vehicleLogId, setVehicleLogId] = useState<string | null>(null);
     const [timeVehicleLog, setTimeVehicleLog] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { token } = useAuth();
 
     useEffect(() => {
+        if (!token) {
+            setPositions([]);
+            setVehicleLogId(null);
+            setTimeVehicleLog(null);
+            setError(null);
+            return;
+        }
+
         let isMounted = true;
         const interval = setInterval(async () => {
             try {
@@ -23,6 +33,7 @@ export const useVehicleLocation = (vehicleId: string, intervalMs: number = 3000)
                     headers: {
                         'Accept': 'application/json',
                         'xRequestId': crypto.randomUUID(),
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                     },
                 });
                 if (!res.ok) {
@@ -39,7 +50,7 @@ export const useVehicleLocation = (vehicleId: string, intervalMs: number = 3000)
                 const newPos: [number, number] = [lat, lng];
                 setVehicleLogId((payload?.vehicleLogId ?? payload?.vehicle_log_id ?? null) as string | null);
                 setTimeVehicleLog((payload?.timeVehicleLog ?? payload?.time_vehicle_log ?? null) as string | null);
-                
+
                 if (!Number.isFinite(newPos[0]) || !Number.isFinite(newPos[1])) return;
 
                 if (!isMounted) return;
@@ -62,10 +73,10 @@ export const useVehicleLocation = (vehicleId: string, intervalMs: number = 3000)
             isMounted = false;
             clearInterval(interval);
         };
-    }, [vehicleId, intervalMs]);
+    }, [vehicleId, intervalMs, token]);
 
     const latestPosition = positions[positions.length - 1];
-    const location: VehicleLocation | null = latestPosition 
+    const location: VehicleLocation | null = latestPosition
         ? {
             position: latestPosition,
             vehicleLogId,
