@@ -102,15 +102,15 @@ const DriverManager: React.FC = () => {
         console.log("🔍 handleScanCard called with driverId:", driverId);
         console.log("🔍 isConnected:", isConnected);
         console.log("🔍 TOPIC_PUB:", TOPIC_PUB);
-        
+
         if (!isConnected) {
             alert("MQTT chưa kết nối. Vui lòng thử lại sau.");
             return;
         }
-        
+
         const result = publish(driverId);
         console.log("🔍 publish result:", result);
-        
+
         if (result) {
             console.log("📤 Đã gửi driverId cho MQTT:", driverId, "vào topic:", TOPIC_PUB);
             setScanningDriverId(driverId);
@@ -150,6 +150,9 @@ const DriverManager: React.FC = () => {
                         <th>Ngày sinh</th>
                         <th>Ngày tuyển</th>
                         <th>Lương</th>
+                        <th>Địa chỉ chính xác</th>
+                        <th>Phường/Xã</th>
+                        <th>Tỉnh</th>
                         <th>Hoạt động</th>
                     </tr>
                 </thead>
@@ -172,6 +175,9 @@ const DriverManager: React.FC = () => {
                                 <td>{d.dateOfBirth}</td>
                                 <td>{d.hireDate}</td>
                                 <td>{d.baseSalary}</td>
+                                <td>{d.exactAddress || "-"}</td>
+                                <td>{d.commune || "-"}</td>
+                                <td>{d.province || "-"}</td>
                                 <td>
                                     <button
                                         className="btn btn--small"

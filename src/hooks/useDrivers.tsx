@@ -16,6 +16,9 @@ export type Driver = {
     hireDate?: string;
     baseSalary?: number | string;
     urlImage?: string;
+    exactAddress?: string;
+    commune?: string;
+    province?: string;
     vehicleId?: string;
 };
 
@@ -41,7 +44,10 @@ const normalizeDriver = (d: any): Driver | null => {
         phone: d?.phone,
         hireDate: d?.hireDate ?? d?.hire_date,
         baseSalary: d?.baseSalary ?? d?.base_salary,
-        urlImage: d?.urlImage ?? d?.imageUrl ?? d?.image_url,
+        urlImage: d?.urlImage ?? d?.url_image,
+        exactAddress: d?.exactAddress ?? d?.exact_address,
+        commune: d?.commune,
+        province: d?.province,
         vehicleId: d?.vehicleId ?? d?.vehicle_id ?? d?.currentVehicleId ?? d?.current_vehicle_id,
     };
 };
@@ -155,7 +161,6 @@ export const useDrivers = () => {
             if (driverData.baseSalary) form.append("baseSalary", driverData.baseSalary);
             if (driverData.vehicleId) form.append("vehicleId", driverData.vehicleId);
             if (driverData.imageFile) {
-                // Gửi file ảnh thực sự (binary)
                 form.append("image", driverData.imageFile, driverData.imageFile.name);
             }
             if (driverData.exactAddress) form.append("exactAddress", driverData.exactAddress);
@@ -208,6 +213,10 @@ export const useDrivers = () => {
             vehicleId?: string;
             imageFile?: File | null;
             currentImageUrl?: string;
+            exactAddress?: string;
+            commune?: string;
+            province?: string;
+
         }
     ): Promise<{ success: boolean; data?: any; error?: string }> => {
         if (!token) {
@@ -233,6 +242,9 @@ export const useDrivers = () => {
             if (driverData.imageFile) {
                 form.append("image", driverData.imageFile.name);
             }
+            if (driverData.exactAddress) form.append("exactAddress", driverData.exactAddress);
+            if (driverData.commune) form.append("commune", driverData.commune);
+            if (driverData.province) form.append("province", driverData.province);
 
             const headers: Record<string, string> = {
                 "x-request-id": crypto.randomUUID(),

@@ -24,12 +24,12 @@ interface EditDriverFormProps {
     }) => Promise<void>;
 }
 
-const EditDriverForm: React.FC<EditDriverFormProps> = ({ 
-    driver, 
-    vehicles, 
-    onSuccess, 
+const EditDriverForm: React.FC<EditDriverFormProps> = ({
+    driver,
+    vehicles,
+    onSuccess,
     onCancel,
-    onUpdate 
+    onUpdate
 }) => {
     const [formError, setFormError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -107,10 +107,10 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
         }
     };
 
-    const currentVehiclePlate = driver.vehicleId 
-        ? vehicles.find(v => v.id === driver.vehicleId)?.plateNumber || 
-          vehicles.find(v => v.id === driver.vehicleId)?.licensePlate || 
-          ""
+    const currentVehiclePlate = driver.vehicleId
+        ? vehicles.find(v => v.id === driver.vehicleId)?.plateNumber ||
+        vehicles.find(v => v.id === driver.vehicleId)?.licensePlate ||
+        ""
         : "";
 
     return (
@@ -198,6 +198,27 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
                             </option>
                         ))}
                     </select>
+                </div>
+                <div>
+                    <label>Địa chỉ chính xác</label>
+                    <input
+                        name="exactAddress"
+                        defaultValue={driver.exactAddress || ""}
+                    />
+                </div>
+                <div>
+                    <label>Phường/Xã</label>
+                    <input
+                        name="commune"
+                        defaultValue={driver.commune || ""}
+                    />
+                </div>
+                <div>
+                    <label>Tỉnh</label>
+                    <input
+                        name="province"
+                        defaultValue={driver.province || ""}
+                    />
                 </div>
                 <div>
                     <label>Ảnh hiện tại</label>
