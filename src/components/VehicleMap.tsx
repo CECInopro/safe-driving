@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
+import '../styles/VehicleMap.scss';
 import { useVehicleLocation } from '../hooks/useVehicleLocation';
 import { useRoute, type Stop } from '../hooks/useRoute';
 
@@ -94,9 +95,9 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
 
         if (!location) {
             return (
-                <div style={{ padding: 20, textAlign: 'center' }}>
+                <div className="vehicle-map-loading">
                     {error ? (
-                        <div style={{ color: 'red' }}>{error}</div>
+                        <div className="vehicle-map-error">{error}</div>
                     ) : (
                         <div>Đang tải vị trí...</div>
                     )}
@@ -108,6 +109,7 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
             <MapContainer
                 center={location.position}
                 zoom={15}
+                className="vehicle-map"
                 style={{ width: '100%', height: 480 }}
             >
                 <TileLayer
@@ -121,7 +123,7 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
                 >
                     <Popup>
                         <div>
-                            <div>Xe ID: {vehicleId}</div>
+                            <div>Xe: {vehicleId}</div>
                             {location.vehicleLogId && <div>Log ID: {location.vehicleLogId}</div>}
                             {location.timeVehicleLog && (
                                 <div>Thời điểm: {new Date(location.timeVehicleLog).toLocaleString('vi-VN')}</div>
@@ -145,7 +147,7 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
 
         if (loading) {
             return (
-                <div style={{ padding: 20, textAlign: 'center' }}>
+                <div className="vehicle-map-loading">
                     <div>Đang tải thông tin tuyến đường...</div>
                 </div>
             );
@@ -153,15 +155,15 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
 
         if (error) {
             return (
-                <div style={{ padding: 20, textAlign: 'center' }}>
-                    <div style={{ color: 'red' }}>{error}</div>
+                <div className="vehicle-map-loading">
+                    <div className="vehicle-map-error">{error}</div>
                 </div>
             );
         }
 
         if (!route || route.stops.length === 0) {
             return (
-                <div style={{ padding: 20, textAlign: 'center' }}>
+                <div className="vehicle-map-empty">
                     <div>Không có dữ liệu điểm dừng</div>
                 </div>
             );
@@ -182,6 +184,7 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
             <MapContainer
                 center={center}
                 zoom={zoom}
+                className="vehicle-map"
                 style={{ width: '100%', height: 480 }}
             >
                 <TileLayer
@@ -193,22 +196,22 @@ const VehicleMap: React.FC<Props> = ({ vehicleId, routeId }) => {
                 {stops.map((stop: Stop, index: number) => (
                     <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
                         <Popup>
-                            <div>
-                                <div style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                            <div className="vehicle-map-popup">
+                                <div className="popup-title">
                                     {index + 1}. {stop.nameStop}
                                 </div>
-                                <div style={{ fontSize: 12, marginBottom: 4 }}>
+                                <div className="popup-info">
                                     <strong>Loại:</strong> {stop.type}
                                 </div>
-                                <div style={{ fontSize: 12, marginBottom: 4 }}>
+                                <div className="popup-info">
                                     <strong>Thứ tự:</strong> {stop.order}
                                 </div>
                                 {stop.exact_address && (
-                                    <div style={{ fontSize: 12, marginBottom: 4 }}>
+                                    <div className="popup-info">
                                         <strong>Địa chỉ:</strong> {stop.exact_address}
                                     </div>
                                 )}
-                                <div style={{ fontSize: 12 }}>
+                                <div className="popup-info">
                                     <strong>Tọa độ:</strong> {stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}
                                 </div>
                             </div>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles/EditDriverForm.scss";
 import { type Driver, type Vehicle } from "../hooks/useDrivers";
 
 interface EditDriverFormProps {
