@@ -45,6 +45,15 @@
     color: #e74c3c;
 }
 
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.actions-column .btn + .btn {
+    margin-left: 8px;
+}
+
 .table-wrapper {
     background: #fff;
     border-radius: 10px;
@@ -62,6 +71,28 @@
     padding: 12px 14px;
     border-bottom: 1px solid #eee;
     text-align: left;
+}
+
+.table .actions-column {
+    width: 140px;
+    white-space: nowrap;
+}
+
+.user-manager__alert {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.user-manager__alert--success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.user-manager__alert--error {
+    background: #fdecea;
+    color: #c62828;
 }
 
 /* Toggle switch */
