@@ -64,7 +64,8 @@ const Routing: React.FC<RoutingProps> = ({ waypoints }) => {
             // Ẩn control panel (có thể bật lại nếu muốn)
             addWaypoints: false,
             fitSelectedRoutes: true,
-            show: false,
+            show: true,
+            collapsible: true,
         }).addTo(map);
 
         return () => {

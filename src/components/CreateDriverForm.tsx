@@ -193,7 +193,7 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
                             type="text"
                             value={exactAddress}
                             onChange={(e) => setExactAddress(e.target.value)}
-                            placeholder="Ví dụ: 789 Điện Biên Phủ"
+                            placeholder="Địa chỉ chính xác"
                         />
                     </div>
                     <div>
@@ -202,16 +202,16 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
                             type="text"
                             value={commune}
                             onChange={(e) => setCommune(e.target.value)}
-                            placeholder="Ví dụ: Phụ Dực"
+                            placeholder="Ví dụ: Xã/Phường"
                         />
                     </div>
                     <div>
-                        <label>Tỉnh/Thành phố</label>
+                        <label>Tỉnh</label>
                         <input
                             type="text"
                             value={province}
                             onChange={(e) => setProvince(e.target.value)}
-                            placeholder="Ví dụ: Hưng Yên"
+                            placeholder="Tỉnh"
                         />
                     </div>
 
