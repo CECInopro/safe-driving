@@ -13,6 +13,7 @@ const Register: React.FC = () => {
                     <input type="email" placeholder="Email" className='register-input' />
                     <input type="password" placeholder="Mật khẩu" className='register-input' />
                     <input type="password" placeholder="Xác nhận mật khẩu" className='register-input' />
+                    
                     <button type="submit" className='register-button'>Đăng ký</button>
                     <button onClick={() => navigate('/login')} type="button" className='register-login'>Đăng nhập</button>
                 </form>
