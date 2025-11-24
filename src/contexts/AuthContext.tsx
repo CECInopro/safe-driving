@@ -4,7 +4,7 @@ const BASE_API_URL = import.meta.env.VITE_API_BASE_URL;
 const BASE_API_URL_LOCAL = import.meta.env.VITE_BASE_URL_LOCAL as string;
 export const AUTH_STORAGE_KEY = "safe-driving-auth";
 
-export type AuthRole = "ADMIN" | "DRIVER" | string;
+export type AuthRole = "ADMIN" | "MANAGER" | "DRIVER" | string;
 
 export interface AuthUser {
     accountId?: string | null;
@@ -28,6 +28,7 @@ interface AuthContextType {
     fetchAccounts: () => Promise<any[] | null>;
     isAuthenticated: boolean;
     isAdmin: boolean;
+    isManager: boolean;
 }
 
 //  Tạo context
@@ -84,7 +85,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 return { success: false, message: "Không tìm thấy token trong phản hồi đăng nhập" };
             }
 
-            const role = body?.data?.role ?? body?.role ?? (username === "admin" ? "ADMIN" : "DRIVER");
+            const fallbackRole =
+                username === "admin" ? "ADMIN" :
+                username === "manager" ? "MANAGER" :
+                "DRIVER";
+
+            const role = body?.data?.role ?? body?.role ?? fallbackRole;
             const accountId = body?.data?.accountId ?? body?.accountId ?? null;
 
             const normalizedUser: AuthUser = {
@@ -139,6 +145,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null);
     }, []);
 
+    const normalizedRole = normalizeRole(user?.role);
+    const isManager = normalizedRole === "MANAGER";
+    const isAdminOrManager = normalizedRole === "ADMIN" || isManager;
+
     const value: AuthContextType = {
         user,
         token: user?.token ?? null,
@@ -146,7 +156,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         fetchAccounts,
         isAuthenticated: !!user?.token,
-        isAdmin: normalizeRole(user?.role) === "ADMIN",
+        isAdmin: isAdminOrManager,
+        isManager,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
