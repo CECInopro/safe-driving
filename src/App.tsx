@@ -10,6 +10,7 @@ import RouteManager from './pages/RouteManager';
 import VehicleManager from './pages/VehicleManager';
 import Notification from './pages/Notification';
 import DriverManager from './pages/DriverManager';
+import TripManager from './pages/TripManager';
 import 'leaflet/dist/leaflet.css';
 
 function App() {
@@ -50,6 +51,14 @@ function App() {
 						element={
 							<ProtectedRoute>
 								<RouteManager />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/trip-manager"
+						element={
+							<ProtectedRoute>
+								<TripManager />
 							</ProtectedRoute>
 						}
 					/>

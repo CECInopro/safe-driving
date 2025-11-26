@@ -34,7 +34,8 @@ const Sidebar: React.FC = () => {
 							<ul className="sidebar-dropdown">
 								{isAdmin && <li onClick={() => { navigate('/user-manager'); document.body.classList.remove('sidebar-open'); }}>Quản lý người dùng</li>}
 								<li onClick={() => { navigate('/driver-manager'); document.body.classList.remove('sidebar-open'); }}>Quản lý tài xế</li>
-								<li onClick={() => { navigate('/route-manager'); document.body.classList.remove('sidebar-open'); }}>Quản lý chuyến đi</li>
+								<li onClick={() => { navigate('/route-manager'); document.body.classList.remove('sidebar-open'); }}>Quản lý đường đi</li>
+								<li onClick={() => { navigate('/trip-manager'); document.body.classList.remove('sidebar-open'); }}>Quản lý chuyến đi</li>
 								<li onClick={() => { navigate('/vehicle-manager'); document.body.classList.remove('sidebar-open'); }}>Quản lý xe</li>
 							</ul>
 						)}
