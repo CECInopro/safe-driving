@@ -1,27 +1,30 @@
 import React, { useState } from 'react';
-import { FaEye } from 'react-icons/fa';
+import { FaEye, FaPlus } from 'react-icons/fa';
 import RouteMapModal from '../components/RouteMapModal';
 import { useRoutes } from '../hooks/useRoutes';
+import CreateStopForm from '../components/CreateStopForm';
 import '../styles/RouteManager.scss';
 
 const RouteManager: React.FC = () => {
     const { routes, loading, error } = useRoutes();
+    const [openCreateForm, setOpenCreateForm] = useState(false);
+    const [routeIdForCreateStop, setRouteIdForCreateStop] = useState<string | null>(null);
     const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
 
     return (
         <>
-    <div className="route-manager">
-        <h2>Quản lý chuyến đi</h2>
-        <table className="route-table">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Tên chuyến đi</th>
-                    <th>Quãng đường</th>
-                    <th>Stop</th>
-                </tr>
-            </thead>
-            <tbody>
+            <div className="route-manager">
+                <h2>Quản lý chuyến đi</h2>
+                <table className="route-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Tên chuyến đi</th>
+                            <th>Quãng đường</th>
+                            <th>Stop</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {loading && (
                             <tr><td colSpan={4}>Đang tải...</td></tr>
                         )}
@@ -36,17 +39,24 @@ const RouteManager: React.FC = () => {
                                 <td>{route.code || route.routeId}</td>
                                 <td>{route.routeName}</td>
                                 <td>{route.distanceKm > 0 ? `${route.distanceKm} km` : '-'}</td>
-                        <td>
-                                    <FaEye 
-                                        style={{ cursor: 'pointer' }} 
+                                <td>
+                                    <FaEye
+                                        style={{ cursor: 'pointer' }}
                                         onClick={() => setSelectedRouteId(route.routeId)}
                                     />
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
+                                    <FaPlus
+                                        style={{ cursor: 'pointer', marginLeft: 16 }}
+                                        onClick={() => {
+                                            setRouteIdForCreateStop(route.routeId);
+                                            setOpenCreateForm(true);
+                                        }}
+                                    />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
             {selectedRouteId && (
                 <RouteMapModal
@@ -54,8 +64,14 @@ const RouteManager: React.FC = () => {
                     onClose={() => setSelectedRouteId(null)}
                 />
             )}
+            {openCreateForm && routeIdForCreateStop && (
+                <CreateStopForm
+                    routeId={routeIdForCreateStop}
+                    onClose={() => setOpenCreateForm(false)}
+                />
+            )}
         </>
-);
+    );
 };
 
 export default RouteManager;

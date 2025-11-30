@@ -3,7 +3,7 @@
     min-height: 100vh;
     position: sticky;
     top: 0;
-    background: #ff7208;
+    background: linear-gradient(45deg, #CFF, #ff7208);
     color: #ffffff;
     padding: 16px 12px;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
@@ -87,7 +87,7 @@
         display: block;
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.45);
+        background: rgba(0, 0, 0, 0.45);
         backdrop-filter: blur(1px);
         z-index: 150;
     }
@@ -105,9 +105,9 @@
         right: 12px;
         width: 36px;
         height: 36px;
-        border: 1px solid rgba(255,255,255,0.25);
+        border: 1px solid rgba(255, 255, 255, 0.25);
         border-radius: 8px;
-        background: rgba(0,0,0,0.1);
+        background: rgba(0, 0, 0, 0.1);
         color: #fff;
         cursor: pointer;
         z-index: 210;
@@ -119,6 +119,12 @@
         background: #fff;
         border-radius: 2px;
     }
-    .sidebar-close-btn span:first-child { transform: rotate(45deg); }
-    .sidebar-close-btn span:last-child { transform: rotate(-45deg); }
+
+    .sidebar-close-btn span:first-child {
+        transform: rotate(45deg);
+    }
+
+    .sidebar-close-btn span:last-child {
+        transform: rotate(-45deg);
+    }
 }

@@ -108,37 +108,35 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
 
     // Tạo các segments với màu sắc dựa trên currentOrder
     const segments: { waypoints: L.LatLng[]; color: string }[] = [];
-    
+
     for (let i = 0; i < stops.length - 1; i++) {
         const segmentWaypoints = [
             L.latLng(stops[i].lat, stops[i].lng),
             L.latLng(stops[i + 1].lat, stops[i + 1].lng)
         ];
-        
+
         // Logic màu sắc:
         // - currentOrder = 0: chưa bắt đầu -> tất cả màu xanh
         // - currentOrder >= totalStop: đã kết thúc -> tất cả màu đỏ
         // - Segment từ stops[i] đến stops[i+1] đã đi qua nếu stops[i+1].order <= currentOrder
-        let color = '#3388ff'; // Màu xanh mặc định
-        
+        let color = '#3388ff';
+
         if (currentOrder === 0) {
-            color = '#3388ff'; // Chưa bắt đầu -> tất cả màu xanh
+            color = '#3388ff';
         } else if (currentOrder >= totalStop) {
-            color = '#ff0000'; // Đã kết thúc -> tất cả màu đỏ
+            color = '#ff0000';
         } else {
-            // Segment đã đi qua nếu stop đích (stops[i+1]) có order <= currentOrder
-            // Ví dụ: currentOrder = 1, segment đến stop có order = 1 đã đi qua -> màu đỏ
             if (stops[i + 1].order <= currentOrder) {
-                color = '#ff0000'; // Đã đi qua -> màu đỏ
+                color = '#ff0000';
             } else {
-                color = '#3388ff'; // Chưa đi qua -> màu xanh
+                color = '#3388ff';
             }
         }
-        
+
         segments.push({ waypoints: segmentWaypoints, color });
     }
 
-    const driverName = trip.assignment?.driver 
+    const driverName = trip.assignment?.driver
         ? `${trip.assignment.driver.firstName || ''} ${trip.assignment.driver.lastName || ''}`.trim() || 'Chưa có'
         : 'Chưa có';
     const vehiclePlate = trip.assignment?.vehicle?.plateNumber || 'Chưa có';
@@ -198,7 +196,7 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
                         {stops.map((stop: Stop, index: number) => {
                             const isVisited = currentOrder > 0 && stop.order <= currentOrder;
                             const isCurrent = currentOrder > 0 && stop.order === currentOrder;
-                            
+
                             return (
                                 <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
                                     <Popup>
@@ -240,4 +238,5 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
 };
 
 export default TripMapModal;
+
 
