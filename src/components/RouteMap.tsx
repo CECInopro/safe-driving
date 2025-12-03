@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
@@ -19,15 +19,16 @@ type RouteMapProps = {
     routeId: string;
 };
 
-type RoutingProps = {
+type RoutingSegmentProps = {
     waypoints: L.LatLng[];
 };
 
-const Routing: React.FC<RoutingProps> = ({ waypoints }) => {
-    const map = useMap();
-    const routingControlRef = React.useRef<L.Routing.Control | null>(null);
 
-    React.useEffect(() => {
+const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints }) => {
+    const map = useMap();
+    const routingControlRef = useRef<L.Routing.Control | null>(null);
+
+    useEffect(() => {
         if (!map || waypoints.length < 2) return;
 
         if (routingControlRef.current) {
@@ -51,7 +52,7 @@ const Routing: React.FC<RoutingProps> = ({ waypoints }) => {
                 missingRouteTolerance: 0,
             },
             addWaypoints: false,
-            fitSelectedRoutes: true,
+            fitSelectedRoutes: false,
             show: true,
             collapsible: true,
         }).addTo(map);
@@ -99,7 +100,17 @@ const RouteMap: React.FC<RouteMapProps> = ({ routeId }) => {
     const avgLng = stops.reduce((sum: number, s: Stop) => sum + s.lng, 0) / stops.length;
     const center: [number, number] = [avgLat, avgLng];
 
-    const waypoints: L.LatLng[] = stops.map((s: Stop) => L.latLng(s.lat, s.lng));
+
+    const segments: { waypoints: L.LatLng[] }[] = [];
+
+    for (let i = 0; i < stops.length - 1; i++) {
+        segments.push({
+            waypoints: [
+                L.latLng(stops[i].lat, stops[i].lng),
+                L.latLng(stops[i + 1].lat, stops[i + 1].lng),
+            ],
+        });
+    }
 
     const zoom = stops.length === 1 ? 15 : stops.length <= 3 ? 12 : 10;
 
@@ -115,7 +126,9 @@ const RouteMap: React.FC<RouteMapProps> = ({ routeId }) => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <Routing waypoints={waypoints} />
+            {segments.map((segment, index) => (
+                <RoutingSegment key={index} waypoints={segment.waypoints} />
+            ))}
             {stops.map((stop: Stop, index: number) => (
                 <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
                     <Popup>
