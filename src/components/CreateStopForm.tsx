@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import '../styles/CreateStopForm.scss';
+import { useAuth } from "../contexts/AuthContext";
 
+const Base_URL = import.meta.env.VITE_BASE_URL as string;
 interface CreateStopFormProps {
     routeId: string;
     onSubmit?: (data: any) => void;
@@ -8,6 +10,7 @@ interface CreateStopFormProps {
 }
 
 const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onClose }) => {
+    const { token } = useAuth();
     const [nameStop, setNameStop] = useState("");
     const [type, setType] = useState("PICKUP");
     const [exactAddress, setExactAddress] = useState("");
@@ -17,6 +20,17 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onCl
     const [commune, setCommune] = useState("");
     const [start, setStart] = useState("");
     const [end, setEnd] = useState("");
+
+    const buildHeaders = () => {
+        const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+            "x-request-id": crypto.randomUUID(),
+        };
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+        return headers;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,6 +62,17 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onCl
                 start,
                 end
             };
+            const fetchCreateStop = await fetch(`${Base_URL}/api/v1/routes/stop`, {
+                method: "POST",
+                headers: buildHeaders(),
+                body: JSON.stringify(result),
+            });
+
+            const body = await fetchCreateStop.json();
+            if (!fetchCreateStop.ok) {
+                alert(`Tạo điểm dừng thất bại: ${body?.message || fetchCreateStop.status}`);
+                return;
+            }
 
             console.log("STOP CREATED:", result);
             alert("Tạo điểm dừng thành công!");

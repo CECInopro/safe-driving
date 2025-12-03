@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
-const BASE_API_URL = import.meta.env.VITE_API_BASE_URL;
-const BASE_API_URL_LOCAL = import.meta.env.VITE_BASE_URL_LOCAL as string;
+const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 export const AUTH_STORAGE_KEY = "safe-driving-auth";
 
 export type AuthRole = "ADMIN" | "MANAGER" | "DRIVER" | string;
@@ -60,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const requestId = "111";
 
         try {
-            const response = await fetch(`${BASE_API_URL_LOCAL}/api/v1/auth/login`, {
+            const response = await fetch(`${BASE_URL}/api/v1/auth/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -87,8 +86,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             const fallbackRole =
                 username === "admin" ? "ADMIN" :
-                username === "manager" ? "MANAGER" :
-                "DRIVER";
+                    username === "manager" ? "MANAGER" :
+                        "DRIVER";
 
             const role = body?.data?.role ?? body?.role ?? fallbackRole;
             const accountId = body?.data?.accountId ?? body?.accountId ?? null;
@@ -115,7 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return null;
         }
 
-        const url = `${BASE_API_URL.replace(/\/$/, "")}/api/v1/accounts`;
+        const url = `${BASE_URL}/api/v1/accounts`;
 
         try {
             const response = await fetch(url, {
