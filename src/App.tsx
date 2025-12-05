@@ -11,6 +11,7 @@ import VehicleManager from './pages/VehicleManager';
 import Notification from './pages/Notification';
 import DriverManager from './pages/DriverManager';
 import TripManager from './pages/TripManager';
+import Update_Firmware from './pages/Update_Firmware';
 import 'leaflet/dist/leaflet.css';
 
 function App() {
@@ -75,6 +76,14 @@ function App() {
 						element={
 							<ProtectedRoute requiredRole='admin'>
 								<Notification />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/update-firmware"
+						element={
+							<ProtectedRoute>
+								<Update_Firmware />
 							</ProtectedRoute>
 						}
 					/>

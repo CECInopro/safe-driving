@@ -41,6 +41,8 @@ const Sidebar: React.FC = () => {
 						)}
 					</li>
 					<li onClick={() => { navigate('/notification'); document.body.classList.remove('sidebar-open'); }}>Thông báo</li>
+					<li onClick={() => { navigate('/update-firmware'); document.body.classList.remove('sidebar-open'); }}>Cập nhật phần mềm</li>
+
 				</ul>
 			</nav>
 		</aside>
