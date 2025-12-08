@@ -76,7 +76,7 @@ const Notification: React.FC = () => {
 
             if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
 
-            // Đánh dấu đã phản hồi thành công: cập nhật localStorage để ẩn nút Yes/No
+
             const items = getAllNotifications();
             const updated = items.map(it =>
                 it.id === notification.id ? { ...it, responded: true } : it
@@ -124,7 +124,6 @@ const Notification: React.FC = () => {
                     const deviceId = payload?.data?.deviceId;
                     const data = payload?.data;
                     const prettyData = data ? JSON.stringify(data, null, 2) : null;
-                    // Lấy topic từ notification
                     const topic = notification.topic;
 
                     return (

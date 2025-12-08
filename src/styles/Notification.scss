@@ -1,58 +1,61 @@
 .notification-container {
-    padding: 20px;
-    max-width: 800px;
+    padding: 24px;
+    max-width: 820px;
     margin: 0 auto;
 
     .notifications-list {
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 18px;
     }
 }
 
 .notification-title {
     margin-bottom: 20px;
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.7rem;
+    font-weight: 700;
 }
 
 .notification-item {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    
-    &.unread {
-        border-left: 4px solid #007bff;
-        background: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
     }
 
-    // Styling khác nhau cho từng topic
+    &.unread {
+        border-left: 5px solid #007bff;
+        background: #f1f7ff;
+    }
+
+    /** Topic styles */
     &.yesno {
-        border-left: 4px solid #28a745;
-        
+        border-left: 5px solid #28a745;
+
         &.unread {
-            border-left: 4px solid #28a745;
-            background: #f8fff9;
+            background: #e9f9ef;
         }
     }
 
     &.violation {
-        border-left: 4px solid #dc3545;
-        
+        border-left: 5px solid #dc3545;
+
         &.unread {
-            border-left: 4px solid #dc3545;
-            background: #fff8f8;
+            background: #ffecec;
         }
     }
 
     &.info {
-        border-left: 4px solid #dc3545; // dùng màu giống violation
-        
+        border-left: 5px solid #0d6efd;
+
         &.unread {
-            border-left: 4px solid #dc3545;
-            background: #fff8f8; // nền giống violation khi chưa đọc
+            background: #e7f1ff;
         }
     }
 
@@ -60,20 +63,18 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
 
         .notification-title-section {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
 
             .topic-badge {
-                padding: 4px 8px;
-                border-radius: 12px;
+                padding: 5px 10px;
+                border-radius: 20px;
                 font-size: 12px;
-                font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
+                font-weight: 600;
                 width: fit-content;
 
                 &.yesno {
@@ -87,8 +88,8 @@
                 }
 
                 &.info {
-                    background: #f8d7da; // badge nền giống violation
-                    color: #721c24;      // chữ giống violation
+                    background: #d6e9ff;
+                    color: #0b57d0;
                 }
             }
         }
@@ -96,21 +97,23 @@
         .notification-meta {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 12px;
+            gap: 12px;
+            font-size: 13px;
             color: #666;
 
             .delete-btn {
-                background: #dc3545;
-                color: white;
-                border: none;
-                padding: 4px 8px;
-                border-radius: 4px;
+                background: transparent;
+                color: #dc3545;
+                border: 1px solid #dc3545;
+                padding: 4px 10px;
+                border-radius: 6px;
                 cursor: pointer;
                 font-size: 12px;
+                transition: 0.2s;
 
                 &:hover {
-                    background: #c82333;
+                    background: #dc3545;
+                    color: white;
                 }
             }
         }
@@ -118,53 +121,72 @@
 }
 
 .notification-body {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     font-size: 1rem;
+}
+
+.notification-data-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
 }
 
 .notification-data {
     background: #f5f5f5;
     padding: 12px;
-    border-radius: 6px;
-    font-family: 'Fira Mono', 'Consolas', monospace;
+    border-radius: 8px;
+    font-family: "Fira Mono", "Consolas", monospace;
     margin-bottom: 16px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .notification-actions {
     margin-top: 16px;
     display: flex;
-    gap: 10px;
+    gap: 14px;
 
     button {
-        padding: 8px 16px;
+        padding: 10px 20px;
         border: none;
-        border-radius: 4px;
+        border-radius: 8px;
         cursor: pointer;
-        
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+
         &:first-child {
             background: #28a745;
             color: white;
+
+            &:hover {
+                background: #218838;
+            }
         }
-        
+
         &:last-child {
             background: #dc3545;
             color: white;
+
+            &:hover {
+                background: #b3202d;
+            }
         }
 
         &:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
         }
     }
 }
 
 .notification-success {
-    color: green;
+    color: #28a745;
     margin-top: 10px;
+    font-weight: 600;
 }
 
 .notification-error {
-    color: red;
+    color: #dc3545;
     margin-top: 10px;
+    font-weight: 600;
 }

@@ -1,13 +1,23 @@
 import React, { useMemo, useState } from "react";
-import { FaEye } from 'react-icons/fa';
+import { FaEye, FaUserPlus } from 'react-icons/fa';
 import '../styles/TripManager.scss';
 import useTrip from "../hooks/useTrip";
 import TripMapModal from "../components/TripMapModal";
+import CreateTripForm from "../components/CreateTripForm";
+import AssignDriverForm from "../components/AssignDriverForm";
+import CreateScheduledTripsForm from "../components/CreateScheduledTripsForm";
 
 const TripManager: React.FC = () => {
     const [query, setQuery] = useState<string>('');
-    const { tripsWithAssignment, loading, error } = useTrip();
+    const { tripsWithAssignment, loading, error, refetch } = useTrip();
     const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+    const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
+    const [showScheduledForm, setShowScheduledForm] = useState<boolean>(false);
+    const [selectedTripForAssignment, setSelectedTripForAssignment] = useState<{
+        tripId: string;
+        tripCode?: string;
+        routeName?: string;
+    } | null>(null);
 
     const filteredTrips = useMemo(() => {
         const q = query.toLowerCase();
@@ -16,6 +26,7 @@ const TripManager: React.FC = () => {
             t.routeName.toLowerCase().includes(q)
         );
     }, [tripsWithAssignment, query]);
+
     return (
         <>
             <div className='trip-manager'>
@@ -24,7 +35,10 @@ const TripManager: React.FC = () => {
                     <div className="trip-manager__actions">
                         <input className="trip-manager__search" placeholder="Tìm kiếm chuyến đi" value={query} onChange={(e) => setQuery(e.target.value)} />
                     </div>
-                    <button className="btn btn--primary">+ Thêm</button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn btn--primary" onClick={() => setShowCreateForm(true)}>+ Thêm</button>
+                        <button className="btn btn--secondary" onClick={() => setShowScheduledForm(true)}>📅 Tạo theo lịch</button>
+                    </div>
                 </div>
                 <table className="trip-table">
                     <thead>
@@ -36,7 +50,7 @@ const TripManager: React.FC = () => {
                             <th>Thời gian bắt đầu</th>
                             <th>Thời gian kết thúc</th>
                             <th>Trạng thái</th>
-                            <th></th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -65,10 +79,26 @@ const TripManager: React.FC = () => {
                                     <td>{t.endTime ? new Date(t.endTime).toLocaleString('vi-VN') : '-'}</td>
                                     <td>{t.isActive === 1 ? 'Đang diễn ra' : 'Đã kết thúc'}</td>
                                     <td>
-                                        <FaEye
-                                            style={{ cursor: 'pointer', fontSize: '18px' }}
-                                            onClick={() => setSelectedTripId(t.tripId)}
-                                        />
+                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                            <FaEye
+                                                style={{ cursor: 'pointer', fontSize: '18px' }}
+                                                onClick={() => setSelectedTripId(t.tripId)}
+                                                title="Xem chi tiết"
+                                            />
+                                            {!t.assignment && (
+                                                <FaUserPlus
+                                                    style={{ cursor: 'pointer', fontSize: '18px', color: '#1976d2' }}
+                                                    onClick={() => {
+                                                        setSelectedTripForAssignment({
+                                                            tripId: t.tripId,
+                                                            tripCode: t.code,
+                                                            routeName: t.routeName,
+                                                        });
+                                                    }}
+                                                    title="Gán tài xế"
+                                                />
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             );
@@ -81,6 +111,41 @@ const TripManager: React.FC = () => {
                 <TripMapModal
                     tripId={selectedTripId}
                     onClose={() => setSelectedTripId(null)}
+                />
+            )}
+
+            {showCreateForm && (
+                <CreateTripForm
+                    onClose={() => setShowCreateForm(false)}
+                    onSuccess={() => {
+                        setShowCreateForm(false);
+                        refetch();
+                    }}
+                    onCancel={() => setShowCreateForm(false)}
+                />
+            )}
+
+            {selectedTripForAssignment && (
+                <AssignDriverForm
+                    tripId={selectedTripForAssignment.tripId}
+                    tripCode={selectedTripForAssignment.tripCode}
+                    routeName={selectedTripForAssignment.routeName}
+                    onClose={() => setSelectedTripForAssignment(null)}
+                    onSuccess={() => {
+                        setSelectedTripForAssignment(null);
+                    }}
+                    onCancel={() => setSelectedTripForAssignment(null)}
+                />
+            )}
+
+            {showScheduledForm && (
+                <CreateScheduledTripsForm
+                    onClose={() => setShowScheduledForm(false)}
+                    onSuccess={() => {
+                        setShowScheduledForm(false);
+                        refetch();
+                    }}
+                    onCancel={() => setShowScheduledForm(false)}
                 />
             )}
         </>

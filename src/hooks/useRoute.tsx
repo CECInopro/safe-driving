@@ -89,6 +89,7 @@ export const useRoute = (routeId: string | null) => {
                         order: Number(s.order ?? 0),
                     })),
                 };
+                console.log('Fetched route:', normalized);
 
                 setRoute(normalized);
             } catch (e: any) {

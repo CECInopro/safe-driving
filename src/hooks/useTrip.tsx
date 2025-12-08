@@ -125,7 +125,7 @@ const useTrip = () => {
                 method: "GET",
                 headers: buildHeaders(),
             });
-            
+
             if (res.ok) {
                 const raw = await res.json();
                 const data = raw?.data ?? raw;
@@ -144,20 +144,20 @@ const useTrip = () => {
             });
             if (!res.ok) return null;
             const raw = await res.json();
-            const list = Array.isArray(raw) 
-                ? raw 
-                : Array.isArray(raw?.data) 
-                    ? raw.data 
-                    : Array.isArray(raw?.items) 
-                        ? raw.items 
+            const list = Array.isArray(raw)
+                ? raw
+                : Array.isArray(raw?.data)
+                    ? raw.data
+                    : Array.isArray(raw?.items)
+                        ? raw.items
                         : [];
-            
-            const vehicle = list.find((v: any) => 
+
+            const vehicle = list.find((v: any) =>
                 (v.vehicleId === vehicleId) || (v.id === vehicleId)
             );
-            
+
             if (!vehicle) return null;
-            
+
             return {
                 vehicleId: vehicle.vehicleId ?? vehicle.id ?? vehicleId,
                 plateNumber: vehicle.plateNumber ?? vehicle.plate_number,
@@ -266,6 +266,7 @@ const useTrip = () => {
                 })) : [],
             }));
             setTrips(normalized);
+            console.log("Fetched trips:", normalized);
 
             // Fetch assignments and enrich trips
             const assignments = await fetchAssignments();
@@ -311,16 +312,62 @@ const useTrip = () => {
         }
     }, [token, buildHeaders, fetchAssignments, fetchDriver, fetchVehicle, fetchAccount]);
 
+    const createTrip = useCallback(async (tripData: {
+        routeId: string;
+        plannedStartTime: string;
+        plannedEndTime: string;
+    }): Promise<{ success: boolean; data?: any; error?: string }> => {
+        if (!token) {
+            return {
+                success: false,
+                error: "Vui lòng đăng nhập để thực hiện thao tác này",
+            };
+        }
+
+        try {
+            const res = await fetch(`${BASE_URL}/api/v1/trips`, {
+                method: "POST",
+                headers: buildHeaders(),
+                body: JSON.stringify({
+                    routeId: tripData.routeId,
+                    plannedStartTime: tripData.plannedStartTime,
+                    plannedEndTime: tripData.plannedEndTime,
+                }),
+            });
+
+            const data = await res.json();
+            console.log("📦 Server response:", data);
+
+            if (!res.ok) {
+                throw new Error(data.message || "Tạo chuyến đi thất bại");
+            }
+
+            await fetchTrips();
+
+            return {
+                success: true,
+                data: data?.data ?? data,
+            };
+        } catch (err: any) {
+            console.error("Error creating trip:", err);
+            return {
+                success: false,
+                error: err.message || "Không thể tạo chuyến đi",
+            };
+        }
+    }, [token, buildHeaders, fetchTrips]);
+
     useEffect(() => {
         fetchTrips();
     }, [fetchTrips]);
 
-    return { 
-        trips, 
-        tripsWithAssignment, 
-        loading, 
+    return {
+        trips,
+        tripsWithAssignment,
+        loading,
         error,
-        refetch: fetchTrips 
+        refetch: fetchTrips,
+        createTrip
     };
 };
 
