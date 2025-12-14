@@ -6,6 +6,33 @@ import { useDrivers } from "../hooks/useDrivers";
 const TOPIC_PUB = "esp32/write_card";
 const TOPIC_SUB = "esp32/write_status";
 
+const LICENSE_CLASSES = [
+    {
+        id: 1,
+        code: "C1",
+        name: "Lái xe tải, xe chuyên dùng có khối lượng thiết kế > 3.500 kg đến 7.500 kg.",
+        capacity: 7500,
+    },
+    {
+        id: 2,
+        code: "C",
+        name: "Lái xe tải, xe chuyên dùng có khối lượng thiết kế trên 7.500 kg, và các loại xe hạng B, C1.",
+        capacity: 99999,
+    },
+    {
+        id: 3,
+        code: "CE",
+        name: "Lái xe container, đầu kéo kéo rơ moóc/sơ mi rơ moóc và các loại xe quy định cho hạng B1, B2, C, FB2, không bị giới hạn bởi trọng tải.",
+        capacity: 0,
+    },
+];
+
+const LICENSE_ALLOWED_VEHICLE_TYPE_IDS: Record<number, number[]> = {
+    1: [1],
+    2: [1, 2],
+    3: [1, 2, 3],
+};
+
 interface CreateDriverFormProps {
     onSuccess?: () => void;
     onCancel?: () => void;
@@ -56,14 +83,33 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
     const [gender, setGender] = useState("1");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const [hireDate, setHireDate] = useState("");
-    const [baseSalary, setBaseSalary] = useState<string>("1500.0");
+    const [hireDate, setHireDate] = useState("");;
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
     const [exactAddress, setExactAddress] = useState("");
     const [commune, setCommune] = useState("");
     const [province, setProvince] = useState("");
+    const [licenseClassId, setLicenseClassId] = useState<number>(LICENSE_CLASSES[0].id);
+
+    const allowedVehicleTypeIds = LICENSE_ALLOWED_VEHICLE_TYPE_IDS[licenseClassId] || [];
+    const filteredVehicles = vehicles.filter((v) => {
+        if (v.vehicleTypeId === undefined || v.vehicleTypeId === null) return true;
+        return allowedVehicleTypeIds.includes(Number(v.vehicleTypeId));
+    });
+
+    useEffect(() => {
+        const selectedVehicleObj = vehicles.find(
+            (v) => (v.plateNumber || v.licensePlate) === selectedVehicle
+        );
+        if (
+            selectedVehicleObj &&
+            selectedVehicleObj.vehicleTypeId !== undefined &&
+            !allowedVehicleTypeIds.includes(Number(selectedVehicleObj.vehicleTypeId))
+        ) {
+            setSelectedVehicle("");
+        }
+    }, [licenseClassId, allowedVehicleTypeIds, selectedVehicle, vehicles]);
 
     // ===== Submit create driver =====
     const onSubmit = async (e: React.FormEvent) => {
@@ -85,12 +131,12 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
             email,
             phone,
             hireDate,
-            baseSalary,
             vehicleId: vehicleId || undefined,
             imageFile,
             exactAddress,
             commune,
             province,
+            licenseClassId,
         });
 
         if (result.success) {
@@ -111,13 +157,13 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
             setEmail("");
             setPhone("");
             setHireDate("");
-            setBaseSalary("1500.0");
             setImageFile(null);
             setSelectedImageUrl(null);
             setSelectedVehicle("");
             setExactAddress("");
             setCommune("");
             setProvince("");
+            setLicenseClassId(LICENSE_CLASSES[0].id);
 
             if (onSuccess) {
                 onSuccess();
@@ -167,8 +213,17 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
                         <input type="date" value={hireDate} onChange={(e) => setHireDate(e.target.value)} />
                     </div>
                     <div>
-                        <label>Lương cơ bản</label>
-                        <input type="number" step="0.01" value={baseSalary} onChange={(e) => setBaseSalary(e.target.value)} />
+                        <label>Bằng lái</label>
+                        <select
+                            value={licenseClassId}
+                            onChange={(e) => setLicenseClassId(Number(e.target.value))}
+                        >
+                            {LICENSE_CLASSES.map((license) => (
+                                <option key={license.id} value={license.id}>
+                                    {license.code} - {license.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div>
@@ -179,12 +234,18 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
                             required
                         >
                             <option value="">-- Chọn xe --</option>
-                            {vehicles.map((v) => (
+                            {filteredVehicles.map((v) => (
                                 <option key={v.id} value={v.plateNumber || v.licensePlate || ""}>
-                                    {v.plateNumber || v.licensePlate || `Xe ${v.id}`}
+                                    {(v.plateNumber || v.licensePlate || `Xe ${v.id}`) +
+                                        (v.vehicleTypeId ? ` - Loại ${v.vehicleTypeId}` : "")}
                                 </option>
                             ))}
                         </select>
+                        {filteredVehicles.length === 0 && (
+                            <div className="alert-error">
+                                Không có xe phù hợp với hạng bằng đã chọn.
+                            </div>
+                        )}
                     </div>
 
                     <div>

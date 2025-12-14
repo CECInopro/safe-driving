@@ -1,4 +1,4 @@
-.account-form-modal {
+.vehicle-form-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -12,7 +12,7 @@
     padding: 20px;
 }
 
-.account-form {
+.vehicle-form {
     background: #fff;
     border-radius: 12px;
     max-width: 420px;
@@ -47,7 +47,7 @@
     }
 }
 
-.account-form__alert {
+.vehicle-form__alert {
     background: #fdecea;
     color: #c62828;
     padding: 10px 12px;
@@ -55,7 +55,7 @@
     font-size: 0.95rem;
 }
 
-.account-form .form-actions {
+.vehicle-form .form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -83,17 +83,4 @@
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -14,12 +14,12 @@ export type Driver = {
     email?: string;
     phone?: string;
     hireDate?: string;
-    baseSalary?: number | string;
     urlImage?: string;
     exactAddress?: string;
     commune?: string;
     province?: string;
     vehicleId?: string;
+    licenseClassId?: number;
 };
 
 export type Vehicle = {
@@ -28,7 +28,15 @@ export type Vehicle = {
     plateNumber?: string;
     brand?: string;
     model?: string;
+    vehicleTypeId?: number;
 };
+
+export type license_type = {
+    id: number;
+    code: string;
+    name: string;
+    capacity: number;
+}
 
 const normalizeDriver = (d: any): Driver | null => {
     const id = d?.id ?? d?.driverId ?? d?.driver_id;
@@ -43,12 +51,12 @@ const normalizeDriver = (d: any): Driver | null => {
         email: d?.email,
         phone: d?.phone,
         hireDate: d?.hireDate ?? d?.hire_date,
-        baseSalary: d?.baseSalary ?? d?.base_salary,
         urlImage: d?.urlImage ?? d?.url_image,
         exactAddress: d?.exactAddress ?? d?.exact_address,
         commune: d?.commune,
         province: d?.province,
         vehicleId: d?.vehicleId ?? d?.vehicle_id ?? d?.currentVehicleId ?? d?.current_vehicle_id,
+        licenseClassId: d?.licenseClassId ?? d?.license_class_id,
     };
 };
 
@@ -61,6 +69,7 @@ const normalizeVehicle = (v: any): Vehicle | null => {
         plateNumber: v?.plateNumber ?? v?.licensePlate,
         brand: v?.brand,
         model: v?.model,
+        vehicleTypeId: v?.vehicleTypeId ?? v?.vehicle_type_id ?? v?.typeId,
     };
 };
 
@@ -135,12 +144,12 @@ export const useDrivers = () => {
         email?: string;
         phone?: string;
         hireDate?: string;
-        baseSalary?: string;
         vehicleId?: string;
         imageFile?: File | null;
         exactAddress?: string;
         commune?: string;
         province?: string;
+        licenseClassId?: number;
     }): Promise<{ success: boolean; data?: any; error?: string }> => {
         if (!token) {
             return {
@@ -158,7 +167,6 @@ export const useDrivers = () => {
             if (driverData.email) form.append("email", driverData.email);
             if (driverData.phone) form.append("phone", driverData.phone);
             if (driverData.hireDate) form.append("hireDate", driverData.hireDate);
-            if (driverData.baseSalary) form.append("baseSalary", driverData.baseSalary);
             if (driverData.vehicleId) form.append("vehicleId", driverData.vehicleId);
             if (driverData.imageFile) {
                 form.append("image", driverData.imageFile, driverData.imageFile.name);
@@ -166,6 +174,12 @@ export const useDrivers = () => {
             if (driverData.exactAddress) form.append("exactAddress", driverData.exactAddress);
             if (driverData.commune) form.append("commune", driverData.commune);
             if (driverData.province) form.append("province", driverData.province);
+            if (driverData.licenseClassId) {
+                form.append("licenseClassId", String(driverData.licenseClassId));
+            }
+
+            const debugPayload = Object.fromEntries(form.entries());
+            console.log("📝 Driver form payload:", debugPayload);
 
             const headers: Record<string, string> = {
                 "x-request-id": "111",
@@ -182,6 +196,7 @@ export const useDrivers = () => {
             console.log("📦 Server response:", data);
 
             if (!res.ok) {
+                console.error("❌ Create driver failed. Payload:", debugPayload);
                 throw new Error(data.message || "Tạo tài xế thất bại");
             }
 
@@ -209,13 +224,13 @@ export const useDrivers = () => {
             email?: string;
             phone?: string;
             hireDate?: string;
-            baseSalary?: string;
             vehicleId?: string;
             imageFile?: File | null;
             currentImageUrl?: string;
             exactAddress?: string;
             commune?: string;
             province?: string;
+            licenseClassId?: number;
 
         }
     ): Promise<{ success: boolean; data?: any; error?: string }> => {
@@ -236,7 +251,6 @@ export const useDrivers = () => {
             if (driverData.email) form.append("email", driverData.email);
             if (driverData.phone) form.append("phone", driverData.phone);
             if (driverData.hireDate) form.append("hireDate", driverData.hireDate);
-            if (driverData.baseSalary) form.append("baseSalary", driverData.baseSalary);
             if (driverData.vehicleId) form.append("vehicleId", driverData.vehicleId);
             if (driverData.currentImageUrl) form.append("currentImageUrl", driverData.currentImageUrl);
             if (driverData.imageFile) {
@@ -245,6 +259,9 @@ export const useDrivers = () => {
             if (driverData.exactAddress) form.append("exactAddress", driverData.exactAddress);
             if (driverData.commune) form.append("commune", driverData.commune);
             if (driverData.province) form.append("province", driverData.province);
+            if (driverData.licenseClassId) {
+                form.append("licenseClassId", String(driverData.licenseClassId));
+            }
 
             const headers: Record<string, string> = {
                 "x-request-id": crypto.randomUUID(),

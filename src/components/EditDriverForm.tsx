@@ -1,6 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../styles/EditDriverForm.scss";
 import { type Driver, type Vehicle } from "../hooks/useDrivers";
+
+const LICENSE_CLASSES = [
+    {
+        id: 1,
+        code: "C1",
+        name: "Lái xe tải, xe chuyên dùng có khối lượng thiết kế > 3.500 kg đến 7.500 kg.",
+    },
+    {
+        id: 2,
+        code: "C",
+        name: "Lái xe tải, xe chuyên dùng có khối lượng thiết kế trên 7.500 kg, và các loại xe hạng B, C1.",
+    },
+    {
+        id: 3,
+        code: "CE",
+        name: "Lái xe container, đầu kéo kéo rơ moóc/sơ mi rơ moóc và các loại xe quy định cho hạng B1, B2, C, FB2, không bị giới hạn bởi trọng tải.",
+    },
+];
+
+const LICENSE_ALLOWED_VEHICLE_TYPE_IDS: Record<number, number[]> = {
+    1: [1],
+    2: [1, 2],
+    3: [1, 2, 3],
+};
 
 interface EditDriverFormProps {
     driver: Driver;
@@ -15,13 +39,13 @@ interface EditDriverFormProps {
         email?: string;
         phone?: string;
         hireDate?: string;
-        baseSalary?: string;
         vehicleId?: string;
         imageFile?: File | null;
         currentImageUrl?: string;
         exactAddress?: string;
         commune?: string;
         province?: string;
+        licenseClassId?: number;
     }) => Promise<void>;
 }
 
@@ -34,6 +58,7 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
 }) => {
     const [formError, setFormError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [licenseClassId, setLicenseClassId] = useState<number>(driver.licenseClassId || LICENSE_CLASSES[0].id);
 
     const getVehicleIdByPlateNumber = (plateNumber: string): string | undefined => {
         const vehicle = vehicles.find(
@@ -41,6 +66,20 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
         );
         return vehicle?.id;
     };
+
+    const allowedVehicleTypeIds = useMemo(
+        () => LICENSE_ALLOWED_VEHICLE_TYPE_IDS[licenseClassId] || [],
+        [licenseClassId]
+    );
+
+    const filteredVehicles = useMemo(
+        () =>
+            vehicles.filter((v) => {
+                if (v.vehicleTypeId === undefined || v.vehicleTypeId === null) return true;
+                return allowedVehicleTypeIds.includes(Number(v.vehicleTypeId));
+            }),
+        [vehicles, allowedVehicleTypeIds]
+    );
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -60,7 +99,6 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
             email?: string;
             phone?: string;
             hireDate?: string;
-            baseSalary?: string;
             vehicleId?: string;
             imageFile?: File | null;
             currentImageUrl?: string;
@@ -76,10 +114,10 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
         const email = formData.get("email") as string | null;
         const phone = formData.get("phone") as string | null;
         const hireDate = formData.get("hireDate") as string | null;
-        const baseSalary = formData.get("baseSalary") as string | null;
         const exactAddress = formData.get("exactAddress") as string | null;
         const commune = formData.get("commune") as string | null;
         const province = formData.get("province") as string | null;
+        const licenseClassFromForm = formData.get("licenseClassId") as string | null;
 
         if (firstName) updateData.firstName = firstName;
         if (lastName) updateData.lastName = lastName;
@@ -88,13 +126,13 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
         if (email) updateData.email = email;
         if (phone) updateData.phone = phone;
         if (hireDate) updateData.hireDate = hireDate;
-        if (baseSalary) updateData.baseSalary = baseSalary;
         if (vehicleId) updateData.vehicleId = vehicleId;
         if (imageFile && imageFile.size > 0) updateData.imageFile = imageFile;
         if (driver.urlImage) updateData.currentImageUrl = driver.urlImage;
         if (exactAddress) updateData.exactAddress = exactAddress;
         if (commune) updateData.commune = commune;
         if (province) updateData.province = province;
+        if (licenseClassFromForm) updateData.licenseClassId = Number(licenseClassFromForm);
 
         try {
             await onUpdate(driver.id, updateData);
@@ -113,6 +151,21 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
         vehicles.find(v => v.id === driver.vehicleId)?.licensePlate ||
         ""
         : "";
+
+    useEffect(() => {
+        const selectedVehicleObj = vehicles.find(
+            (v) => (v.plateNumber || v.licensePlate) === currentVehiclePlate
+        );
+        if (
+            selectedVehicleObj &&
+            selectedVehicleObj.vehicleTypeId !== undefined &&
+            !allowedVehicleTypeIds.includes(Number(selectedVehicleObj.vehicleTypeId))
+        ) {
+            // nếu xe đang gán không hợp lệ với bằng mới thì bỏ chọn
+            const select = document.querySelector<HTMLSelectElement>('select[name="vehicle"]');
+            if (select) select.value = "";
+        }
+    }, [allowedVehicleTypeIds, currentVehiclePlate, vehicles]);
 
     return (
         <div className="driver-form-modal" onClick={onCancel}>
@@ -178,27 +231,38 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
                     />
                 </div>
                 <div>
-                    <label>Lương cơ bản</label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        name="baseSalary"
-                        defaultValue={driver.baseSalary?.toString() || ""}
-                    />
+                    <label>Bằng lái</label>
+                    <select
+                        name="licenseClassId"
+                        value={licenseClassId}
+                        onChange={(e) => setLicenseClassId(Number(e.target.value))}
+                    >
+                        {LICENSE_CLASSES.map((license) => (
+                            <option key={license.id} value={license.id}>
+                                {license.code} - {license.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div>
                     <label>Xe được gán</label>
                     <select name="vehicle" defaultValue={currentVehiclePlate}>
                         <option value="">-- Chọn xe --</option>
-                        {vehicles.map((v) => (
+                        {filteredVehicles.map((v) => (
                             <option
                                 key={v.id}
                                 value={v.plateNumber || v.licensePlate || ""}
                             >
-                                {v.plateNumber || v.licensePlate || `Xe ${v.id}`}
+                                {(v.plateNumber || v.licensePlate || `Xe ${v.id}`) +
+                                    (v.vehicleTypeId ? ` - Loại ${v.vehicleTypeId}` : "")}
                             </option>
                         ))}
                     </select>
+                    {filteredVehicles.length === 0 && (
+                        <div className="alert-error">
+                            Không có xe phù hợp với hạng bằng đã chọn.
+                        </div>
+                    )}
                 </div>
                 <div>
                     <label>Địa chỉ chính xác</label>
