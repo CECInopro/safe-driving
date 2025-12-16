@@ -105,6 +105,7 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
             exactAddress?: string;
             commune?: string;
             province?: string;
+            licenseClassId?: number;
         } = {};
 
         const firstName = formData.get("firstName") as string | null;
@@ -168,9 +169,9 @@ const EditDriverForm: React.FC<EditDriverFormProps> = ({
     }, [allowedVehicleTypeIds, currentVehiclePlate, vehicles]);
 
     return (
-        <div className="driver-form-modal" onClick={onCancel}>
+        <div className="edit-driver-form-modal" onClick={onCancel}>
             <form
-                className="driver-form"
+                className="edit-driver-form"
                 onClick={(e) => e.stopPropagation()}
                 onSubmit={handleSubmit}
             >

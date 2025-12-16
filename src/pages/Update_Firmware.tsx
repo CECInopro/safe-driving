@@ -28,7 +28,7 @@ const Update_Firmware: React.FC = () => {
         formData.append("description", description);
 
         try {
-            const response = await fetch("http://26.157.165.184:8080/api/v1/firmware", {
+            const response = await fetch("http://ALB-2931116.ap-southeast-1.elb.amazonaws.com/api/v1/firmware", {
                 method: "POST",
                 headers: buildHeaders(),
                 body: formData,

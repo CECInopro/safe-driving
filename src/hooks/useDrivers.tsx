@@ -132,7 +132,7 @@ export const useDrivers = () => {
                 .filter(Boolean) as Vehicle[];
             setVehicles(list);
         } catch (e) {
-            console.error("❌ Lỗi khi tải danh sách xe:", e);
+            console.error("Lỗi khi tải danh sách xe:", e);
         }
     }, [buildHeaders, token]);
 
@@ -179,7 +179,7 @@ export const useDrivers = () => {
             }
 
             const debugPayload = Object.fromEntries(form.entries());
-            console.log("📝 Driver form payload:", debugPayload);
+            console.log("Driver form payload:", debugPayload);
 
             const headers: Record<string, string> = {
                 "x-request-id": "111",
@@ -196,7 +196,7 @@ export const useDrivers = () => {
             console.log("📦 Server response:", data);
 
             if (!res.ok) {
-                console.error("❌ Create driver failed. Payload:", debugPayload);
+                console.error("Create driver failed. Payload:", debugPayload);
                 throw new Error(data.message || "Tạo tài xế thất bại");
             }
 
@@ -207,7 +207,7 @@ export const useDrivers = () => {
                 data: data.data || data,
             };
         } catch (e: any) {
-            console.error("❌ Lỗi khi tạo tài xế:", e);
+            console.error("Lỗi khi tạo tài xế:", e);
             return {
                 success: false,
                 error: e.message || "Không thể tạo tài xế",
@@ -254,7 +254,7 @@ export const useDrivers = () => {
             if (driverData.vehicleId) form.append("vehicleId", driverData.vehicleId);
             if (driverData.currentImageUrl) form.append("currentImageUrl", driverData.currentImageUrl);
             if (driverData.imageFile) {
-                form.append("image", driverData.imageFile.name);
+                form.append("image", driverData.imageFile, driverData.imageFile.name);
             }
             if (driverData.exactAddress) form.append("exactAddress", driverData.exactAddress);
             if (driverData.commune) form.append("commune", driverData.commune);
@@ -293,7 +293,7 @@ export const useDrivers = () => {
                 data: data.data || data,
             };
         } catch (e: any) {
-            console.error("❌ Lỗi PUT driver:", e);
+            console.error("Lỗi PUT driver:", e);
             return {
                 success: false,
                 error: e.message || "Không thể cập nhật tài xế",
@@ -327,7 +327,7 @@ export const useDrivers = () => {
                 success: true,
             };
         } catch (e: any) {
-            console.error("❌ Lỗi khi xóa tài xế:", e);
+            console.error("Lỗi khi xóa tài xế:", e);
             return {
                 success: false,
                 error: e.message || "Không thể xóa tài xế",
@@ -371,7 +371,7 @@ export const useDrivers = () => {
 
     const sendToArduino = useCallback(async (payload: { accountId: string; driverId: string }) => {
         if (!ARDUINO_URL) {
-            console.warn("⚠️ VITE_ARDUINO_URL chưa cấu hình. Payload:", payload);
+            console.warn("VITE_ARDUINO_URL chưa cấu hình. Payload:", payload);
             return false;
         }
 

@@ -6,7 +6,7 @@ type Props = {
 };
 
 const VehicleCamera: React.FC<Props> = ({ vehicleId }) => {
-    const cameraWsUrl = `ws://ALB3-1825307273.ap-southeast-1.elb.amazonaws.com/api/v1/ws?vehicleId=${encodeURIComponent(vehicleId)}`;
+    const cameraWsUrl = `ws://ALB-2931116.ap-southeast-1.elb.amazonaws.com/api/v1/ws?vehicleId=${encodeURIComponent(vehicleId)}`;
 
     return (
         <div className="vehicle-camera">

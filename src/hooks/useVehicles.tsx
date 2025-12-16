@@ -136,8 +136,8 @@ export const useVehicles = () => {
                 odometerKm: vehicleData.odometerKm,
                 status: vehicleData.status,
             });
-            
-            console.log('📤 Request payload:', body);
+
+            console.log('Request payload:', body);
 
             const res = await fetch(`${BASE_URL}/api/v1/vehicles`, {
                 method: 'POST',
@@ -146,7 +146,7 @@ export const useVehicles = () => {
             });
 
             const data = await res.json();
-            console.log('📦 Server response:', data);
+            console.log('Server response:', data);
 
             if (!res.ok) {
                 throw new Error(data.message || 'Tạo xe thất bại');
@@ -159,7 +159,7 @@ export const useVehicles = () => {
                 data: data.data || data,
             };
         } catch (e: any) {
-            console.error('❌ Lỗi khi tạo xe:', e);
+            console.error('Lỗi khi tạo xe:', e);
             return {
                 success: false,
                 error: e.message || 'Không thể tạo xe',

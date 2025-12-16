@@ -177,8 +177,8 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
 
     return (
         <>
-            <div className="driver-form-modal" onClick={onCancel}>
-                <form className="driver-form" onClick={(e) => e.stopPropagation()} onSubmit={onSubmit}>
+            <div className="create-driver-form-modal" onClick={onCancel}>
+                <form className="create-driver-form" onClick={(e) => e.stopPropagation()} onSubmit={onSubmit}>
                     {formError && <div className="alert-error">{formError}</div>}
                     <div>
                         <label>Họ</label>

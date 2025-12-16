@@ -12,7 +12,7 @@ export const useRoutes = () => {
 
     const builderHeaders = useCallback((): Record<string, string> => {
         const headers: Record<string, string> = {
-            'Accept': 'application/json',
+            'Content-type': 'application/json',
             'xRequestId': crypto.randomUUID(),
         };
         if (token) {
@@ -22,7 +22,7 @@ export const useRoutes = () => {
         return headers;
     }, [token]);
 
-    const fetchRoutes = async () => {
+    const fetchRoutes = useCallback(async () => {
         if (!token) return;
         try {
             setLoading(true);
@@ -61,7 +61,7 @@ export const useRoutes = () => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [builderHeaders, token]);
 
     const createRoute = async (routeData: {
         routeName: string;
@@ -76,24 +76,29 @@ export const useRoutes = () => {
             };
         }
         try {
-            const form = new FormData();
-            form.append('routeName', routeData.routeName);
-            form.append('code', routeData.code);
-            form.append('distanceKm', routeData.distanceKm.toString());
-            form.append('standardDurationMin', routeData.standardDurationMin.toString());
+            // const form = new FormData();
+            // form.append('routeName', routeData.routeName);
+            // form.append('code', routeData.code);
+            // form.append('distanceKm', routeData.distanceKm.toString());
+            // form.append('standardDurationMin', routeData.standardDurationMin.toString());
             const headers = builderHeaders();
             const res = await fetch(`${BASE_URL}/api/v1/routes`, {
                 method: 'POST',
                 headers,
-                body: form,
+                body: JSON.stringify(routeData),
             });
 
             if (!res.ok) {
-                console.error('Create route failed:', res.status, await res.text());
+                const errorText = await res.text();
+                console.error('Create route failed:', res.status, errorText);
                 throw new Error(`Create route failed: ${res.status}`);
             }
+
             const raw = await res.json();
+            
+            // Refetch routes sau khi tạo thành công
             await fetchRoutes();
+            
             return {
                 success: true,
                 data: raw
@@ -117,7 +122,9 @@ export const useRoutes = () => {
     return {
         routes,
         loading,
-        error
+        error,
+        fetchRoutes,
+        createRoute
     };
 };
 

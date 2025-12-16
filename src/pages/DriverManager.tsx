@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import "../styles/DriverManager.scss";
 import { useDrivers, type Driver } from "../hooks/useDrivers";
 import CreateDriverForm from "../components/CreateDriverForm";
@@ -18,6 +18,7 @@ const DriverManager: React.FC = () => {
     const [scanningDriverId, setScanningDriverId] = useState<string | null>(null);
     const [cardMessage, setCardMessage] = useState("");
     const scanningRef = useRef(false);
+    const [query, setQuery] = useState<string>("");
 
     // Cập nhật ref khi scanningDriverId thay đổi
     useEffect(() => {
@@ -28,18 +29,16 @@ const DriverManager: React.FC = () => {
         topicPub: TOPIC_PUB,
         topicSub: TOPIC_SUB,
         onMessage: (_topic, message) => {
-            console.log("📩 Nhận message từ MQTT:", message);
+            console.log("Nhận message từ MQTT:", message);
             if (scanningRef.current) {
-                // Chỉ hiện "thành công" khi nhận được "✅ Ghi dữ liệu thành công!" từ ESP32
-                // Không phải "✅ Dữ liệu nhận thành công. Chạm thẻ để ghi!"
                 if (/Ghi dữ liệu thành công/i.test(message)) {
-                    setCardMessage("✅ Quét thẻ thành công!");
+                    setCardMessage("Quét thẻ thành công!");
                     setTimeout(() => {
                         setScanningDriverId(null);
                         setCardMessage("");
                     }, 2000);
-                } else if (/❌.*Ghi.*thất bại|❌ Ghi dữ liệu thất bại/i.test(message)) {
-                    setCardMessage("❌ Quét thẻ thất bại, vui lòng thử lại.");
+                } else if (/.*Ghi.*thất bại|Ghi dữ liệu thất bại/i.test(message)) {
+                    setCardMessage("Quét thẻ thất bại, vui lòng thử lại.");
                 } else if (message.includes("Chạm thẻ") || message.includes("chạm thẻ") || message.includes("Dữ liệu nhận thành công")) {
                     // ESP32 yêu cầu chạm thẻ hoặc xác nhận đã nhận dữ liệu
                     setCardMessage("🪪 " + message);
@@ -50,6 +49,31 @@ const DriverManager: React.FC = () => {
             }
         },
     });
+
+    const getCurrentVehicle = (driver: Driver) => {
+        if (!driver.vehicleId) return null;
+        return vehicles.find(v => v.id === driver.vehicleId);
+    };
+
+    const filteredDrivers = useMemo(() => {
+        const q = query.toLowerCase();
+        return drivers.filter((d) => {
+            const fullName = [d.lastName, d.firstName].filter(Boolean).join(" ").toLowerCase();
+            const email = (d.email || "").toLowerCase();
+            const phone = (d.phone || "").toLowerCase();
+            const currentVehicle = getCurrentVehicle(d);
+            const vehicleText = currentVehicle
+                ? (currentVehicle.plateNumber || currentVehicle.licensePlate || `Xe ${currentVehicle.id}`).toLowerCase()
+                : "";
+
+            return (
+                fullName.includes(q) ||
+                email.includes(q) ||
+                phone.includes(q) ||
+                vehicleText.includes(q)
+            );
+        });
+    }, [drivers, query, vehicles]);
 
     const handleDelete = async (driverId: string) => {
         if (!window.confirm("Bạn có chắc chắn muốn xóa tài xế này?")) {
@@ -92,10 +116,6 @@ const DriverManager: React.FC = () => {
             alert(result.error || "Không thể cập nhật tài xế");
         }
     };
-    const getCurrentVehicle = (driver: Driver) => {
-        if (!driver.vehicleId) return null;
-        return vehicles.find(v => v.id === driver.vehicleId);
-    };
 
     // Xử lý quét thẻ
     const handleScanCard = (driverId: string) => {
@@ -112,9 +132,9 @@ const DriverManager: React.FC = () => {
         console.log("🔍 publish result:", result);
 
         if (result) {
-            console.log("📤 Đã gửi driverId cho MQTT:", driverId, "vào topic:", TOPIC_PUB);
+            console.log("Đã gửi driverId cho MQTT:", driverId, "vào topic:", TOPIC_PUB);
             setScanningDriverId(driverId);
-            setCardMessage("🪪 Vui lòng quét thẻ trên màn hình...");
+            setCardMessage("Vui lòng quét thẻ trên màn hình...");
         } else {
             alert("Không thể gửi yêu cầu quét thẻ. Vui lòng thử lại.");
         }
@@ -122,8 +142,24 @@ const DriverManager: React.FC = () => {
 
     return (
         <div className="driver-manager">
-            <h2>Quản lý tài xế</h2>
-            <button onClick={() => setShowForm(true)}>Tạo tài xế mới</button>
+            <div className="driver-manager__top">
+                <h2>Quản lý tài xế</h2>
+                <div className="driver-manager__actions">
+                    <input
+                        className="driver-manager__search"
+                        placeholder="Tìm theo tên, email, SĐT, xe..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                    <button
+                        className="btn btn--primary"
+                        type="button"
+                        onClick={() => setShowForm(true)}
+                    >
+                        + Thêm
+                    </button>
+                </div>
+            </div>
 
             {successMessage && <div className="alert-success">{successMessage}</div>}
             {error && !showForm && <div className="alert-error">{error}</div>}
@@ -139,66 +175,69 @@ const DriverManager: React.FC = () => {
                     onCancel={() => setShowForm(false)}
                 />
             )}
-            <table className="driver-table">
-                <thead>
-                    <tr>
-                        <th>Ảnh</th>
-                        <th>Họ tên</th>
-                        <th>Xe đang lái</th>
-                        <th>Email</th>
-                        <th>SĐT</th>
-                        <th>Ngày sinh</th>
-                        <th>Ngày tuyển</th>
-                        <th>Hoạt động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {loading && <tr><td colSpan={8}>Đang tải...</td></tr>}
-                    {!loading && drivers.length === 0 && <tr><td colSpan={8}>Không có dữ liệu</td></tr>}
-                    {!loading && drivers.map((d) => {
-                        const currentVehicle = getCurrentVehicle(d);
-                        return (
-                            <tr key={d.id}>
-                                <td>{d.urlImage ? <img src={d.urlImage} alt="avatar" width={50} height={50} /> : "No img"}</td>
-                                <td>{[d.lastName, d.firstName].filter(Boolean).join(" ")}</td>
-                                <td>
-                                    {currentVehicle
-                                        ? (currentVehicle.plateNumber || currentVehicle.licensePlate || `Xe ${currentVehicle.id}`)
-                                        : "Chưa gán xe"}
-                                </td>
-                                <td>{d.email}</td>
-                                <td>{d.phone}</td>
-                                <td>{d.dateOfBirth}</td>
-                                <td>{d.hireDate}</td>
-                                <td>
-                                    <button
-                                        className="btn btn--small"
-                                        onClick={() => setEditingDriver(d)}
-                                    >
-                                        Sửa
-                                    </button>
-                                    <button
-                                        className="btn btn--small btn--danger"
-                                        style={{ marginLeft: 8 }}
-                                        onClick={() => handleDelete(d.id)}
-                                        disabled={deletingDriverId === d.id}
-                                    >
-                                        {deletingDriverId === d.id ? "Đang xóa..." : "Xóa"}
-                                    </button>
-                                    <button
-                                        className="btn btn--small"
-                                        style={{ marginLeft: 8 }}
-                                        onClick={() => handleScanCard(d.id)}
-                                        disabled={scanningDriverId === d.id}
-                                    >
-                                        Quét thẻ
-                                    </button>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+
+            <div className="table-wrapper">
+                <table className="driver-table">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Họ tên</th>
+                            <th>Xe đang lái</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Ngày sinh</th>
+                            <th>Ngày tuyển</th>
+                            <th>Hoạt động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading && <tr><td colSpan={8}>Đang tải...</td></tr>}
+                        {!loading && filteredDrivers.length === 0 && <tr><td colSpan={8}>Không có dữ liệu</td></tr>}
+                        {!loading && filteredDrivers.map((d) => {
+                            const currentVehicle = getCurrentVehicle(d);
+                            return (
+                                <tr key={d.id}>
+                                    <td>{d.urlImage ? <img src={d.urlImage} alt="avatar" width={50} height={50} /> : "No img"}</td>
+                                    <td>{[d.lastName, d.firstName].filter(Boolean).join(" ")}</td>
+                                    <td>
+                                        {currentVehicle
+                                            ? (currentVehicle.plateNumber || currentVehicle.licensePlate || `Xe ${currentVehicle.id}`)
+                                            : "Chưa gán xe"}
+                                    </td>
+                                    <td>{d.email}</td>
+                                    <td>{d.phone}</td>
+                                    <td>{d.dateOfBirth}</td>
+                                    <td>{d.hireDate}</td>
+                                    <td>
+                                        <button
+                                            className="btn btn--small"
+                                            onClick={() => setEditingDriver(d)}
+                                        >
+                                            Sửa
+                                        </button>
+                                        <button
+                                            className="btn btn--small btn--danger"
+                                            style={{ marginLeft: 8 }}
+                                            onClick={() => handleDelete(d.id)}
+                                            disabled={deletingDriverId === d.id}
+                                        >
+                                            {deletingDriverId === d.id ? "Đang xóa..." : "Xóa"}
+                                        </button>
+                                        <button
+                                            className="btn btn--small"
+                                            style={{ marginLeft: 8 }}
+                                            onClick={() => handleScanCard(d.id)}
+                                            disabled={scanningDriverId === d.id}
+                                        >
+                                            Quét thẻ
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
 
             {/* ===== Form sửa tài xế ===== */}
             {editingDriver && (

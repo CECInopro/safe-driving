@@ -1,0 +1,92 @@
+.route-form-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.route-form {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.route-form > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.route-form label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+    font-size: 14px;
+}
+
+.route-form input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.route-form input:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.route-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.route-form__actions button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+
+.route-form__actions button[type="button"] {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.route-form__actions button[type="button"]:hover {
+    background: #e0e0e0;
+}
+
+.route-form__actions button[type="submit"] {
+    background: #1976d2;
+    color: white;
+}
+
+.route-form__actions button[type="submit"]:hover {
+    background: #1565c0;
+}
+
+.route-form__actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

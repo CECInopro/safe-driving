@@ -34,19 +34,19 @@ export const useMqtt = (options: MqttOptions = {}) => {
         const mqttClient = mqtt.connect(MQTT_URL, mqttOptions);
 
         mqttClient.on("connect", () => {
-            console.log("✅ MQTT Connected!");
+            console.log("MQTT Connected!");
             setIsConnected(true);
             mqttClient.subscribe(topicSub);
-            console.log("📡 Subscribed to:", topicSub);
+            console.log("Subscribed to:", topicSub);
         });
 
         mqttClient.on("error", (err) => {
-            console.error("❌ MQTT Error:", err);
+            console.error("MQTT Error:", err);
         });
 
         mqttClient.on("message", (topic, message) => {
             const msg = message.toString();
-            console.log("📩 Nhận:", topic, msg);
+            console.log("Nhận:", topic, msg);
             
             if (onMessageRef.current) {
                 onMessageRef.current(topic, msg);
@@ -64,11 +64,11 @@ export const useMqtt = (options: MqttOptions = {}) => {
 
     const publish = (message: string) => {
         if (client && isConnected) {
-            console.log("📤 Gửi:", message, "vào topic:", topicPub);
+            console.log("Gửi:", message, "vào topic:", topicPub);
             client.publish(topicPub, message);
             return true;
         }
-        console.error("❌ Không thể gửi: client hoặc connection không sẵn sàng");
+        console.error("Không thể gửi: client hoặc connection không sẵn sàng");
         return false;
     };
 

@@ -1,20 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FaEye, FaPlus } from 'react-icons/fa';
 import RouteMapModal from '../components/RouteMapModal';
 import { useRoutes } from '../hooks/useRoutes';
 import CreateStopForm from '../components/CreateStopForm';
+import CreateRouteForm from '../components/CreateRouteForm';
 import '../styles/RouteManager.scss';
 
 const RouteManager: React.FC = () => {
     const { routes, loading, error } = useRoutes();
-    const [openCreateForm, setOpenCreateForm] = useState(false);
+    const [openCreateStopForm, setOpenCreateStopForm] = useState(false);
+    const [isCreatingRoute, setIsCreatingRoute] = useState(false);
+    const [query, setQuery] = useState<string>('');
     const [routeIdForCreateStop, setRouteIdForCreateStop] = useState<string | null>(null);
     const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
 
+    const filteredRoutes = useMemo(() => {
+        const q = query.toLowerCase();
+        return routes.filter((r) =>
+            r.routeName.toLowerCase().includes(q)
+        );
+    }, [routes, query]);
+
+    const handleCloseCreateStopForm = () => {
+        setOpenCreateStopForm(false);
+        setRouteIdForCreateStop(null);
+    };
+
     return (
-        <>
-            <div className="route-manager">
+        <div className="route-manager">
+            <div className="route-manager__top">
                 <h2>Quản lý chuyến đi</h2>
+                <div className="route-manager-actions">
+                    <input 
+                        type="text" 
+                        className="route-manager__search" 
+                        placeholder="Tìm kiếm" 
+                        value={query} 
+                        onChange={(e) => setQuery(e.target.value)} 
+                    />
+                    <button
+                        className="btn btn--primary"
+                        type="button"
+                        onClick={() => setIsCreatingRoute(true)}
+                    >
+                        + Thêm
+                    </button>
+                </div>
+            </div>
+
+            <div className="table-wrapper">
                 <table className="route-table">
                     <thead>
                         <tr>
@@ -31,10 +65,10 @@ const RouteManager: React.FC = () => {
                         {error && !loading && (
                             <tr><td colSpan={4} style={{ color: 'red' }}>{error}</td></tr>
                         )}
-                        {!loading && !error && routes.length === 0 && (
+                        {!loading && !error && filteredRoutes.length === 0 && (
                             <tr><td colSpan={4}>Không có dữ liệu</td></tr>
                         )}
-                        {!loading && !error && routes.map((route) => (
+                        {!loading && !error && filteredRoutes.map((route) => (
                             <tr key={route.routeId}>
                                 <td>{route.code || route.routeId}</td>
                                 <td>{route.routeName}</td>
@@ -48,7 +82,7 @@ const RouteManager: React.FC = () => {
                                         style={{ cursor: 'pointer', marginLeft: 16 }}
                                         onClick={() => {
                                             setRouteIdForCreateStop(route.routeId);
-                                            setOpenCreateForm(true);
+                                            setOpenCreateStopForm(true);
                                         }}
                                     />
                                 </td>
@@ -64,13 +98,19 @@ const RouteManager: React.FC = () => {
                     onClose={() => setSelectedRouteId(null)}
                 />
             )}
-            {openCreateForm && routeIdForCreateStop && (
+            {openCreateStopForm && routeIdForCreateStop && (
                 <CreateStopForm
                     routeId={routeIdForCreateStop}
-                    onClose={() => setOpenCreateForm(false)}
+                    onClose={handleCloseCreateStopForm}
                 />
             )}
-        </>
+            {isCreatingRoute && (
+                <CreateRouteForm
+                    onCancel={() => setIsCreatingRoute(false)}
+                    onSuccess={() => setIsCreatingRoute(false)}
+                />
+            )}
+        </div>
     );
 };
 

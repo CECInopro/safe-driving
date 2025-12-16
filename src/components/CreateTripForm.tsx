@@ -17,7 +17,7 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ routeId: initialRouteId
     const [plannedEndTime, setPlannedEndTime] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { routes, loading: routesLoading } = useRoutes();
-    const { createTrip } = useTrip();
+    const { createTrip } = useTrip(); 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

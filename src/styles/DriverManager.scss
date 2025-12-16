@@ -3,6 +3,54 @@
     min-height: 100vh;
 }
 
+.driver-manager__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+
+.driver-manager h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+
+    @media (max-width: 768px) {
+        font-size: 22px;
+    }
+}
+
+.driver-manager__actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.driver-manager__search {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    min-width: 260px;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
 .driver-table {
     width: 100%;
     border-collapse: collapse;
@@ -57,29 +105,6 @@
     border-radius: 6px;
     margin-bottom: 16px;
     font-weight: 500;
-}
-
-.driver-manager>button {
-    background: #ff7208;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-bottom: 20px;
-
-    &:hover {
-        background: #1565c0;
-    }
-}
-
-.driver-manager h2 {
-    margin-bottom: 20px;
-    color: #fff;
-    font-size: 24px;
-    font-weight: 600;
 }
 
 .overlay {
