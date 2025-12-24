@@ -45,11 +45,11 @@ const Login: React.FC = () => {
                     {error && <div style={{ color: 'red', marginBottom: 10 }}>{error}</div>}
                     <input type="text" placeholder="Tên đăng nhập" className='login-input' value={username} onChange={e => setUsername(e.target.value)} />
                     <input type="password" placeholder="Mật khẩu" className='login-input' value={password} onChange={e => setPassword(e.target.value)} />
-                    <button type="button" className='login-forgot-password'>Quên mật khẩu?</button>
+                    {/* <button type="button" className='login-forgot-password'>Quên mật khẩu?</button> */}
                     <button type="button" className='login-button' onClick={handleLogin} disabled={loading}>
                         {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </button>
-                    <button onClick={() => navigate('/register')} type="button" className='login-register'>Đăng ký</button>
+                    {/* <button onClick={() => navigate('/register')} type="button" className='login-register'>Đăng ký</button> */}
                 </form>
             </div>
         </div>

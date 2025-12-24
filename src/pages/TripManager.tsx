@@ -5,7 +5,7 @@ import useTrip from "../hooks/useTrip";
 import TripMapModal from "../components/TripMapModal";
 import CreateTripForm from "../components/CreateTripForm";
 import AssignDriverForm from "../components/AssignDriverForm";
-import CreateScheduledTripsForm from "../components/CreateScheduledTripsForm";
+// import CreateScheduledTripsForm from "../components/CreateScheduledTripsForm";
 
 const TripManager: React.FC = () => {
     const [query, setQuery] = useState<string>('');
@@ -37,74 +37,103 @@ const TripManager: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button className="btn btn--primary" onClick={() => setShowCreateForm(true)}>+ Thêm</button>
-                        <button className="btn btn--secondary" onClick={() => setShowScheduledForm(true)}>📅 Tạo theo lịch</button>
+                        {/* <button className="btn btn--secondary" onClick={() => setShowScheduledForm(true)}>📅 Tạo theo lịch</button> */}
                     </div>
                 </div>
-                <table className="trip-table">
-                    <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Tên chuyến đi</th>
-                            <th>Tài xế thực hiện</th>
-                            <th>Xe thực hiện</th>
-                            <th>Thời gian bắt đầu</th>
-                            <th>Thời gian kết thúc</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading && (
-                            <tr><td colSpan={8}>Đang tải...</td></tr>
-                        )}
-                        {error && !loading && (
-                            <tr><td colSpan={8} style={{ color: 'red' }}>{error}</td></tr>
-                        )}
-                        {!loading && !error && filteredTrips.length === 0 && (
-                            <tr><td colSpan={8}>Không có dữ liệu</td></tr>
-                        )}
-                        {!loading && !error && filteredTrips.map((t) => {
-                            const driverName = t.assignment?.driver
-                                ? `${t.assignment.driver.firstName || ''} ${t.assignment.driver.lastName || ''}`.trim() || '-'
-                                : '-';
-                            const vehiclePlate = t.assignment?.vehicle?.plateNumber || '-';
+                <div className="trip-table-wrapper">
+                    <table className="trip-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Tên chuyến đi</th>
+                                <th>Tài xế thực hiện</th>
+                                <th>Xe thực hiện</th>
+                                <th>Dự kiến bắt đầu</th>
+                                <th>Dự kiến kết thúc</th>
+                                <th>Thực tế bắt đầu</th>
+                                <th>Thực tế kết thúc</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading && (
+                                <tr><td colSpan={10}>Đang tải...</td></tr>
+                            )}
+                            {error && !loading && (
+                                <tr><td colSpan={10} style={{ color: 'red' }}>{error}</td></tr>
+                            )}
+                            {!loading && !error && filteredTrips.length === 0 && (
+                                <tr><td colSpan={10}>Không có dữ liệu</td></tr>
+                            )}
+                            {!loading && !error && filteredTrips.map((t) => {
+                                const driverName = t.assignment?.driver
+                                    ? `${t.assignment.driver.firstName || ''} ${t.assignment.driver.lastName || ''}`.trim() || '-'
+                                    : '-';
+                                const vehiclePlate = t.assignment?.vehicle?.plateNumber || '-';
 
-                            return (
-                                <tr key={t.tripId}>
-                                    <td>{t.code || t.tripId}</td>
-                                    <td>{t.routeName}</td>
-                                    <td>{driverName}</td>
-                                    <td>{vehiclePlate}</td>
-                                    <td>{t.startTime ? new Date(t.startTime).toLocaleString('vi-VN') : '-'}</td>
-                                    <td>{t.endTime ? new Date(t.endTime).toLocaleString('vi-VN') : '-'}</td>
-                                    <td>{t.isActive === 1 ? 'Đang diễn ra' : 'Đã kết thúc'}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                            <FaEye
-                                                style={{ cursor: 'pointer', fontSize: '18px' }}
-                                                onClick={() => setSelectedTripId(t.tripId)}
-                                                title="Xem chi tiết"
-                                            />
-                                            {!t.assignment && (
-                                                <FaUserPlus
-                                                    style={{ cursor: 'pointer', fontSize: '18px', color: '#1976d2' }}
-                                                    onClick={() => {
-                                                        setSelectedTripForAssignment({
-                                                            tripId: t.tripId,
-                                                            tripCode: t.code,
-                                                            routeName: t.routeName,
-                                                        });
-                                                    }}
-                                                    title="Gán tài xế"
+                                // Tính toán trạng thái dựa trên thời gian thực tế
+                                const getTripStatus = () => {
+                                    const hasStartTime = t.startTime && typeof t.startTime === 'string' && t.startTime.trim() !== '';
+                                    const hasEndTime = t.endTime && typeof t.endTime === 'string' && t.endTime.trim() !== '';
+
+                                    if (!hasStartTime) {
+                                        return 'Chưa bắt đầu';
+                                    } else if (hasStartTime && !hasEndTime) {
+                                        return 'Đang diễn ra';
+                                    } else {
+                                        return 'Đã kết thúc';
+                                    }
+                                };
+
+                                const status = getTripStatus();
+                                const statusClass = status === 'Chưa bắt đầu' ? 'status-pending'
+                                    : status === 'Đang diễn ra' ? 'status-active'
+                                        : 'status-completed';
+
+                                return (
+                                    <tr key={t.tripId}>
+                                        <td>{t.code || t.tripId}</td>
+                                        <td>{t.routeName}</td>
+                                        <td>{driverName}</td>
+                                        <td>{vehiclePlate}</td>
+                                        <td>{t.plannedStartTime ? new Date(t.plannedStartTime).toLocaleString('vi-VN') : '-'}</td>
+                                        <td>{t.plannedEndTime ? new Date(t.plannedEndTime).toLocaleString('vi-VN') : '-'}</td>
+                                        <td>{t.startTime ? new Date(t.startTime).toLocaleString('vi-VN') : '-'}</td>
+                                        <td>{t.endTime ? new Date(t.endTime).toLocaleString('vi-VN') : '-'}</td>
+                                        <td>
+                                            <span className={`trip-status ${statusClass}`}>
+                                                {status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                                <FaEye
+                                                    style={{ cursor: 'pointer', fontSize: '18px' }}
+                                                    onClick={() => setSelectedTripId(t.tripId)}
+                                                    title="Xem chi tiết"
                                                 />
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                                                {!t.assignment && (
+                                                    <FaUserPlus
+                                                        style={{ cursor: 'pointer', fontSize: '18px', color: '#1976d2' }}
+                                                        onClick={() => {
+                                                            setSelectedTripForAssignment({
+                                                                tripId: t.tripId,
+                                                                tripCode: t.code,
+                                                                routeName: t.routeName,
+                                                            });
+                                                        }}
+                                                        title="Gán tài xế"
+                                                    />
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {selectedTripId && (
@@ -138,7 +167,7 @@ const TripManager: React.FC = () => {
                 />
             )}
 
-            {showScheduledForm && (
+            {/* {showScheduledForm && (
                 <CreateScheduledTripsForm
                     onClose={() => setShowScheduledForm(false)}
                     onSuccess={() => {
@@ -147,7 +176,7 @@ const TripManager: React.FC = () => {
                     }}
                     onCancel={() => setShowScheduledForm(false)}
                 />
-            )}
+            )} */}
         </>
     );
 }

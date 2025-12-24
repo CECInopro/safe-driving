@@ -17,45 +17,54 @@ L.Icon.Default.mergeOptions({
 
 type RouteMapProps = {
     routeId: string;
+    className?: string;
+    style?: React.CSSProperties;
 };
 
 type RoutingSegmentProps = {
     waypoints: L.LatLng[];
+    color: string;
 };
 
-
-const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints }) => {
+const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints, color }) => {
     const map = useMap();
     const routingControlRef = useRef<L.Routing.Control | null>(null);
 
     useEffect(() => {
         if (!map || waypoints.length < 2) return;
 
+        // Xóa routing control cũ nếu có
         if (routingControlRef.current) {
             map.removeControl(routingControlRef.current);
             routingControlRef.current = null;
         }
 
+        // Tạo routing control mới với màu tương ứng
         routingControlRef.current = L.Routing.control({
-            waypoints,
+            waypoints: waypoints,
+            router: L.Routing.osrmv1({
+                serviceUrl: 'http://localhost:5001/route/v1',
+                profile: 'driving',
+            }),
+            draggableWaypoints: false,
             routeWhileDragging: false,
             showAlternatives: false,
             lineOptions: {
                 styles: [
                     {
-                        color: '#3388ff',
+                        color: color,
                         weight: 4,
-                        opacity: 0.7,
-                    },
+                        opacity: 0.7
+                    }
                 ],
                 extendToWaypoints: true,
-                missingRouteTolerance: 0,
+                missingRouteTolerance: 0
             },
             addWaypoints: false,
-            fitSelectedRoutes: false,
+            fitSelectedRoutes: true,
             show: true,
             collapsible: true,
-        }).addTo(map);
+        } as any).addTo(map);
 
         return () => {
             if (routingControlRef.current) {
@@ -63,12 +72,12 @@ const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints }) => {
                 routingControlRef.current = null;
             }
         };
-    }, [map, waypoints]);
+    }, [map, waypoints, color]);
 
     return null;
 };
 
-const RouteMap: React.FC<RouteMapProps> = ({ routeId }) => {
+const RouteMap: React.FC<RouteMapProps> = ({ routeId, className = 'vehicle-map', style = { width: '100%', height: 480 } }) => {
     const { route, loading, error } = useRoute(routeId);
 
     if (loading) {
@@ -99,61 +108,73 @@ const RouteMap: React.FC<RouteMapProps> = ({ routeId }) => {
     const avgLat = stops.reduce((sum: number, s: Stop) => sum + s.lat, 0) / stops.length;
     const avgLng = stops.reduce((sum: number, s: Stop) => sum + s.lng, 0) / stops.length;
     const center: [number, number] = [avgLat, avgLng];
+    const zoom = stops.length === 1 ? 15 : stops.length <= 3 ? 12 : 10;
 
-
-    const segments: { waypoints: L.LatLng[] }[] = [];
+    // Tạo các segments với màu xanh (vì route không có trạng thái visited/unvisited)
+    const segments: { waypoints: L.LatLng[]; color: string }[] = [];
 
     for (let i = 0; i < stops.length - 1; i++) {
-        segments.push({
-            waypoints: [
-                L.latLng(stops[i].lat, stops[i].lng),
-                L.latLng(stops[i + 1].lat, stops[i + 1].lng),
-            ],
-        });
+        const segmentWaypoints = [
+            L.latLng(stops[i].lat, stops[i].lng),
+            L.latLng(stops[i + 1].lat, stops[i + 1].lng)
+        ];
+        segments.push({ waypoints: segmentWaypoints, color: '#3388ff' });
     }
-
-    const zoom = stops.length === 1 ? 15 : stops.length <= 3 ? 12 : 10;
 
     return (
         <MapContainer
             center={center}
             zoom={zoom}
-            className="vehicle-map"
-            style={{ width: '100%', height: 480 }}
+            className={className}
+            style={style}
         >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
+            {/* Render các segments */}
             {segments.map((segment, index) => (
-                <RoutingSegment key={index} waypoints={segment.waypoints} />
+                <RoutingSegment
+                    key={index}
+                    waypoints={segment.waypoints}
+                    color={segment.color}
+                />
             ))}
-            {stops.map((stop: Stop, index: number) => (
-                <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
-                    <Popup>
-                        <div className="vehicle-map-popup">
-                            <div className="popup-title">
-                                {index + 1}. {stop.nameStop}
-                            </div>
-                            <div className="popup-info">
-                                <strong>Loại:</strong> {stop.type}
-                            </div>
-                            <div className="popup-info">
-                                <strong>Thứ tự:</strong> {stop.order}
-                            </div>
-                            {stop.exact_address && (
-                                <div className="popup-info">
-                                    <strong>Địa chỉ:</strong> {stop.exact_address}
+
+            {/* Render markers cho các stops */}
+            {stops.map((stop: Stop, index: number) => {
+                const isRouteMapModal = className.includes('route-map-modal');
+                const popupClass = isRouteMapModal ? 'route-map-modal__popup' : 'vehicle-map-popup';
+                const titleClass = isRouteMapModal ? 'route-map-modal__popup-title' : 'popup-title';
+                const infoClass = isRouteMapModal ? 'route-map-modal__popup-info' : 'popup-info';
+
+                return (
+                    <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
+                        <Popup>
+                            <div className={popupClass}>
+                                <div className={titleClass}>
+                                    {index + 1}. {stop.nameStop}
                                 </div>
-                            )}
-                            <div className="popup-info">
-                                <strong>Tọa độ:</strong> {stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}
+                                <div className={infoClass}>
+                                    <strong>Loại:</strong> {stop.type}
+                                </div>
+                                <div className={infoClass}>
+                                    <strong>Thứ tự:</strong> {stop.order}
+                                </div>
+                                {stop.exact_address && (
+                                    <div className={infoClass}>
+                                        <strong>Địa chỉ:</strong> {stop.exact_address}
+                                    </div>
+                                )}
+                                <div className={infoClass}>
+                                    <strong>Tọa độ:</strong> {stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}
+                                </div>
                             </div>
-                        </div>
-                    </Popup>
-                </Marker>
-            ))}
+                        </Popup>
+                    </Marker>
+                );
+            })}
         </MapContainer>
     );
 };

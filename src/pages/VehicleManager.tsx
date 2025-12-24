@@ -22,7 +22,7 @@ const VehicleManager: React.FC = () => {
 
     const filtered = useMemo(() => {
         const q = query.toLowerCase();
-        return vehicles.filter((v) => 
+        return vehicles.filter((v) =>
             v.code.toLowerCase().includes(q) ||
             v.name.toLowerCase().includes(q) ||
             (v.plateNumber && v.plateNumber.toLowerCase().includes(q)) ||
@@ -75,9 +75,8 @@ const VehicleManager: React.FC = () => {
                     <thead>
                         <tr>
                             <th>Code</th>
-                            <th>Tên</th>
+                            <th>Mô tả</th>
                             <th>Biển số xe</th>
-                            <th>Người lái</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -93,7 +92,6 @@ const VehicleManager: React.FC = () => {
                                 <td style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis' }}>{car.code}</td>
                                 <td>{car.name}</td>
                                 <td>{car.plateNumber || '-'}</td>
-                                <td>{car.driver || '-'}</td>
                                 <td>
                                     <FaEye style={{ cursor: 'pointer' }} onClick={() => setSelectedCar(car)} />
                                 </td>

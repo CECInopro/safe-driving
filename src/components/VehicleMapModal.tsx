@@ -1,6 +1,7 @@
 import React from 'react';
 import VehicleMap from './VehicleMap';
 import VehicleCamera from './VehicleCamera';
+import '../styles/VehicleMapModal.scss';
 
 type Props = {
     plateNumber: string;

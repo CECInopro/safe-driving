@@ -119,11 +119,11 @@ const Notification: React.FC = () => {
             <div className="notifications-list">
                 {notifications.map((notification) => {
                     const payload = notification.payload;
-                    const title = payload?.notification?.title || payload?.data?.title;
-                    const body = payload?.notification?.body || payload?.data?.body;
+                    const title = payload?.data?.title || payload?.notification?.title;
+                    const body = payload?.data?.body || payload?.notification?.body;
                     const deviceId = payload?.data?.deviceId;
+                    const vehiclePlateNumber = payload?.data?.vehiclePlateNumber || payload?.data?.plateNumber;
                     const data = payload?.data;
-                    const prettyData = data ? JSON.stringify(data, null, 2) : null;
                     const topic = notification.topic;
 
                     return (
@@ -134,46 +134,69 @@ const Notification: React.FC = () => {
                             <div className="notification-header">
                                 <div className="notification-title-section">
                                     <h3 className="notification-subtitle">{title}</h3>
-                                    <span className={`topic-badge ${topic}`}>
-                                        {topic === 'yesno' ? 'Cần phản hồi' : topic === 'violation' ? 'Vi phạm' : 'Thông tin'}
+                                    <span className={`topic-badge ${topic} ${topic === 'yesno' && notification.responded ? 'responded' : ''}`}>
+                                        {topic === 'yesno'
+                                            ? (notification.responded ? 'Đã phản hồi' : 'Cần phản hồi')
+                                            : topic === 'violation'
+                                                ? 'Vi phạm'
+                                                : 'Thông tin'}
                                     </span>
                                 </div>
                                 <div className="notification-meta">
-                                    <span className="notification-time">
-                                        {formatTimestamp(notification.timestamp)}
-                                    </span>
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() => handleDeleteNotification(notification.id)}
-                                    >
-                                        Xóa
+                                    <span className="notification-time">{formatTimestamp(notification.timestamp)}</span>
+                                    <button className="delete-btn" onClick={() => handleDeleteNotification(notification.id)} title="Xóa thông báo">Xóa
                                     </button>
                                 </div>
                             </div>
-                            {body && <p className="notification-body">{body}</p>}
-                            {deviceId && (
-                                <p className="notification-device">DeviceId: {deviceId}</p>
-                            )}
-                            {prettyData && (
-                                <div>
-                                    <h4 className="notification-data-title">Dữ liệu đính kèm</h4>
-                                    <pre className="notification-data">{prettyData}</pre>
+
+                            {/* Thông tin chi tiết được tổ chức gọn gàng */}
+                            {(deviceId || vehiclePlateNumber || data?.firstName || data?.lastName || data?.email || data?.phone) && (
+                                <div className="notification-details">
+                                    {vehiclePlateNumber && (
+                                        <div className="detail-item">
+                                            <span className="detail-label">Biển số xe:</span>
+                                            <span className="detail-value highlight">{vehiclePlateNumber}</span>
+                                        </div>
+                                    )}
+                                    {deviceId && (
+                                        <div className="detail-item">
+                                            <span className="detail-label">Device ID:</span>
+                                            <span className="detail-value">{deviceId}</span>
+                                        </div>
+                                    )}
+                                    {(data?.firstName || data?.lastName) && (
+                                        <div className="detail-item">
+                                            <span className="detail-label">Tài xế:</span>
+                                            <span className="detail-value">{[data?.firstName, data?.lastName].filter(Boolean).join(' ')}</span>
+                                        </div>
+                                    )}
+                                    {data?.email && (
+                                        <div className="detail-item">
+                                            <span className="detail-label">Email:</span>
+                                            <span className="detail-value">{data.email}</span>
+                                        </div>
+                                    )}
+                                    {data?.phone && (
+                                        <div className="detail-item">
+                                            <span className="detail-label">Số điện thoại:</span>
+                                            <span className="detail-value">{data.phone}</span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
+
+                            {body && !deviceId && !vehiclePlateNumber && !data?.firstName && !data?.lastName && (
+                                <p className="notification-body">{body}</p>
+                            )}
+
                             {/* Chỉ hiển thị nút Yes/No cho thông báo yesno */}
                             {topic === 'yesno' && !notification.responded && (
                                 <div className="notification-actions">
-                                    <button
-                                        disabled={isSubmitting}
-                                        onClick={() => sendDecision("1", notification)}
-                                    >
-                                        Yes
+                                    <button className="action-btn accept-btn" disabled={isSubmitting} onClick={() => sendDecision("1", notification)}>
+                                        Chấp nhận
                                     </button>
-                                    <button
-                                        disabled={isSubmitting}
-                                        onClick={() => sendDecision("0", notification)}
-                                    >
-                                        No
+                                    <button className="action-btn reject-btn" disabled={isSubmitting} onClick={() => sendDecision("0", notification)}>
+                                        Từ chối
                                     </button>
                                 </div>
                             )}

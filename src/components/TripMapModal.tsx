@@ -6,6 +6,7 @@ import L from 'leaflet';
 import 'leaflet-routing-machine';
 import useTrip from '../hooks/useTrip';
 import type { TripWithAssignment, Stop } from '../hooks/useTrip';
+import '../styles/TripMapModal.scss';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -40,6 +41,11 @@ const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints, color }) => 
         // Tạo routing control mới với màu tương ứng
         routingControlRef.current = L.Routing.control({
             waypoints: waypoints,
+            router: L.Routing.osrmv1({
+                serviceUrl: 'http://localhost:5001/route/v1',
+                profile: 'driving',
+            }),
+            draggableWaypoints: false,
             routeWhileDragging: false,
             showAlternatives: false,
             lineOptions: {
@@ -53,11 +59,12 @@ const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints, color }) => 
                 extendToWaypoints: true,
                 missingRouteTolerance: 0
             },
+
             addWaypoints: false,
-            fitSelectedRoutes: false,
+            fitSelectedRoutes: true,
             show: true,
             collapsible: true,
-        }).addTo(map);
+        } as any).addTo(map);
 
         return () => {
             if (routingControlRef.current) {
@@ -76,10 +83,10 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
 
     if (!trip) {
         return (
-            <div className="car-map-modal">
-                <div className="car-map-modal__content">
-                    <button className="car-map-modal__close" onClick={onClose}>Đóng</button>
-                    <div>Không tìm thấy chuyến đi</div>
+            <div className="trip-map-modal">
+                <div className="trip-map-modal__content">
+                    <button className="trip-map-modal__close" onClick={onClose}>Đóng</button>
+                    <div className="trip-map-modal__notfound">Không tìm thấy chuyến đi</div>
                 </div>
             </div>
         );
@@ -91,10 +98,10 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
 
     if (stops.length === 0) {
         return (
-            <div className="car-map-modal">
-                <div className="car-map-modal__content">
-                    <button className="car-map-modal__close" onClick={onClose}>Đóng</button>
-                    <div>Không có dữ liệu điểm dừng</div>
+            <div className="trip-map-modal">
+                <div className="trip-map-modal__content">
+                    <button className="trip-map-modal__close" onClick={onClose}>Đóng</button>
+                    <div className="trip-map-modal__nodata">Không có dữ liệu điểm dừng</div>
                 </div>
             </div>
         );
@@ -113,11 +120,6 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
             L.latLng(stops[i].lat, stops[i].lng),
             L.latLng(stops[i + 1].lat, stops[i + 1].lng)
         ];
-
-        // Logic màu sắc:
-        // - currentOrder = 0: chưa bắt đầu -> tất cả màu xanh
-        // - currentOrder >= totalStop: đã kết thúc -> tất cả màu đỏ
-        // - Segment từ stops[i] đến stops[i+1] đã đi qua nếu stops[i+1].order <= currentOrder
         let color = '#3388ff';
 
         if (currentOrder === 0) {
@@ -141,40 +143,33 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
     const vehiclePlate = trip.assignment?.vehicle?.plateNumber || 'Chưa có';
 
     return (
-        <div className="car-map-modal">
-            <div className="car-map-modal__content">
-                <div style={{ flex: 1 }}>
-                    <button className="car-map-modal__close" onClick={onClose}>Đóng</button>
-                    <h3>
+        <div className="trip-map-modal">
+            <div className="trip-map-modal__content">
+                <div>
+                    <button className="trip-map-modal__close" onClick={onClose}>Đóng</button>
+                    <h3 className="trip-map-modal__title">
                         Chuyến đi: {trip.routeName || `ID: ${tripId}`}
                         {trip.code && ` (${trip.code})`}
                     </h3>
-                    <div style={{ margin: '8px 0', fontSize: 14, color: '#666', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                            <p style={{ margin: 0 }}>Quãng đường: {trip.distanceKm} km</p>
+                    <div className="trip-map-modal__info">
+                        <div className="trip-map-modal__row">
+                            <p className="trip-map-modal__distance">Quãng đường: {trip.distanceKm} km</p>
                             {trip.standardDurationMin > 0 && (
-                                <p style={{ margin: 0 }}>Thời gian dự kiến: {trip.standardDurationMin} phút</p>
+                                <p className="trip-map-modal__duration">Thời gian dự kiến: {trip.standardDurationMin} phút</p>
                             )}
-                        </div>
-                        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                            <p style={{ margin: 0 }}>Tài xế: {driverName}</p>
-                            <p style={{ margin: 0 }}>Xe: {vehiclePlate}</p>
-                        </div>
-                        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                            <p style={{ margin: 0 }}>Trạng thái: {currentOrder === 0 ? 'Chưa bắt đầu' : currentOrder >= totalStop ? 'Đã kết thúc' : `Đang diễn ra (đã đi qua ${currentOrder}/${totalStop} điểm dừng)`}</p>
+                            <p className="trip-map-modal__driver">Tài xế: {driverName}</p>
+                            <p className="trip-map-modal__vehicle">Xe: {vehiclePlate}</p>
+                            <p className="trip-map-modal__status">Trạng thái: {currentOrder === 0 ? 'Chưa bắt đầu' : currentOrder >= totalStop ? 'Đã kết thúc' : `Đang diễn ra (đã đi qua ${currentOrder}/${totalStop} điểm dừng)`}</p>
                         </div>
                     </div>
-                    {trip.note && (
-                        <p style={{ margin: '8px 0', fontSize: 14, color: '#666' }}>{trip.note}</p>
-                    )}
-                    <div style={{ marginTop: '16px', marginBottom: '8px', fontSize: 14 }}>
-                        <span style={{ color: '#ff0000', marginRight: '16px' }}>● Đã đi qua</span>
-                        <span style={{ color: '#3388ff' }}>● Chưa đi qua</span>
+                    <div className="trip-map-modal__legend">
+                        <span className="trip-map-modal__legend-visited">● Đã đi qua</span>
+                        <span className="trip-map-modal__legend-unvisited">● Chưa đi qua</span>
                     </div>
                     <MapContainer
                         center={center}
                         zoom={zoom}
-                        className="vehicle-map"
+                        className="trip-map-modal__map"
                         style={{ width: '100%', height: 400 }}
                     >
                         <TileLayer
@@ -199,28 +194,28 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
                             return (
                                 <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
                                     <Popup>
-                                        <div className="vehicle-map-popup">
-                                            <div className="popup-title">
+                                        <div className="trip-map-modal__popup">
+                                            <div className="trip-map-modal__popup-title">
                                                 {index + 1}. {stop.nameStop}
-                                                {isCurrent && <span style={{ color: '#ff0000', marginLeft: '8px' }}>(Đang tại đây)</span>}
-                                                {isVisited && !isCurrent && <span style={{ color: '#ff0000', marginLeft: '8px' }}>(Đã đi qua)</span>}
+                                                {isCurrent && <span className="trip-map-modal__popup-current">(Đang tại đây)</span>}
+                                                {isVisited && !isCurrent && <span className="trip-map-modal__popup-visited">(Đã đi qua)</span>}
                                             </div>
-                                            <div className="popup-info">
+                                            <div className="trip-map-modal__popup-info">
                                                 <strong>Loại:</strong> {stop.type}
                                             </div>
-                                            <div className="popup-info">
+                                            <div className="trip-map-modal__popup-info">
                                                 <strong>Thứ tự:</strong> {stop.order}
                                             </div>
                                             {stop.exactAddress && (
-                                                <div className="popup-info">
+                                                <div className="trip-map-modal__popup-info">
                                                     <strong>Địa chỉ:</strong> {stop.exactAddress}
                                                 </div>
                                             )}
-                                            <div className="popup-info">
+                                            <div className="trip-map-modal__popup-info">
                                                 <strong>Tọa độ:</strong> {stop.lat.toFixed(4)}, {stop.lng.toFixed(4)}
                                             </div>
                                             {stop.arrive && (
-                                                <div className="popup-info">
+                                                <div className="trip-map-modal__popup-info">
                                                     <strong>Thời gian đến:</strong> {new Date(stop.arrive).toLocaleString('vi-VN')}
                                                 </div>
                                             )}

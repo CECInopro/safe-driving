@@ -31,13 +31,39 @@
     min-width: 260px;
 }
 
+.trip-table-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+
+    &::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+
+        &:hover {
+            background: #555;
+        }
+    }
+}
+
 .trip-table {
     width: 100%;
+    min-width: 1500px;
     border-collapse: collapse;
     background: #fff;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
 }
 
 .trip-table th,
@@ -83,5 +109,29 @@
     &.status-cancelled {
         background: rgba(248, 113, 113, 0.2);
         color: #b91c1c;
+    }
+}
+
+.trip-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &.status-pending {
+        background: rgba(251, 191, 36, 0.15);
+        color: #92400e;
+    }
+
+    &.status-active {
+        background: rgba(56, 189, 248, 0.15);
+        color: #0369a1;
+    }
+
+    &.status-completed {
+        background: rgba(52, 211, 153, 0.2);
+        color: #047857;
     }
 }

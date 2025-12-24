@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDrivers } from "../hooks/useDrivers";
-import { useAccount } from "../hooks/useAccount";
 import { useAssignment } from "../hooks/useAssignment";
 import useTrip from "../hooks/useTrip";
+import { useAuth } from "../contexts/AuthContext";
 import "../styles/AssignDriverForm.scss";
 
 interface AssignDriverFormProps {
@@ -23,28 +23,14 @@ const AssignDriverForm: React.FC<AssignDriverFormProps> = ({
     onCancel 
 }) => {
     const [driverId, setDriverId] = useState("");
-    const [accountId, setAccountId] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { drivers, loading: driversLoading } = useDrivers();
-    const { accounts, loading: accountsLoading } = useAccount();
     const { createAssignment } = useAssignment();
     const { refetch } = useTrip();
+    const { user } = useAuth();
 
-    // Lọc accounts có role DRIVER
-    const driverAccounts = accounts.filter(acc => acc.role === 'DRIVER');
-
-    // Tự động tìm account khi chọn driver (nếu driverId trùng với accountId)
-    useEffect(() => {
-        if (driverId && driverAccounts.length > 0) {
-            // Thử tìm account có accountId trùng với driverId
-            const matchedAccount = driverAccounts.find(
-                acc => acc.accountId === driverId || acc.username === driverId
-            );
-            if (matchedAccount) {
-                setAccountId(matchedAccount.accountId);
-            }
-        }
-    }, [driverId, driverAccounts]);
+    // Lấy accountID từ tài khoản đang đăng nhập
+    const accountId = user?.accountId || "";
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -55,7 +41,7 @@ const AssignDriverForm: React.FC<AssignDriverFormProps> = ({
         }
 
         if (!accountId) {
-            alert("Vui lòng chọn tài khoản");
+            alert("Không tìm thấy thông tin tài khoản. Vui lòng đăng nhập lại.");
             return;
         }
 
@@ -117,27 +103,6 @@ const AssignDriverForm: React.FC<AssignDriverFormProps> = ({
                             </option>
                         ))}
                     </select>
-                </div>
-
-                <div>
-                    <label>Chọn tài khoản *</label>
-                    <select
-                        value={accountId}
-                        onChange={(e) => setAccountId(e.target.value)}
-                        disabled={accountsLoading}
-                        required
-                    >
-                        <option value="">-- Chọn tài khoản --</option>
-                        {driverAccounts.map((account) => (
-                            <option key={account.accountId} value={account.accountId}>
-                                {account.username} ({account.role})
-                                {account.status ? ` - ${account.status}` : ''}
-                            </option>
-                        ))}
-                    </select>
-                    {driverAccounts.length === 0 && !accountsLoading && (
-                        <p className="assign-form__hint">Không có tài khoản DRIVER nào</p>
-                    )}
                 </div>
 
                 {selectedDriver && (

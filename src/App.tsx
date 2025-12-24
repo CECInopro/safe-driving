@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Welcome from './pages/Welcome';
 import Login from './pages/Login';
-import Register from './pages/Register';
+// import Register from './pages/Register';
 import HomeLayout from './layout/HomeLayout';
 import Home from './pages/Home';
 import UserManager from './pages/UserManager';
@@ -20,7 +20,7 @@ function App() {
 			<Routes>
 				<Route path="/" element={<Welcome />} />
 				<Route path="/login" element={<Login />} />
-				<Route path="/register" element={<Register />} />
+				{/* <Route path="/register" element={<Register />} /> */}
 
 				<Route element={<HomeLayout />}>
 					<Route
