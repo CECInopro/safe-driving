@@ -21,14 +21,17 @@ const Home: React.FC = () => {
     const tripsData = useMemo(() => {
         return tripsByMonth.map(t => ({
             yearMonth: t.yearMonth,
-            tripCount: t.tripCount,
+            completedTripCount: t.completedTripCount,
         }))
     }, [tripsByMonth]);
 
     const violationsData = useMemo(() => {
         return violationsByMonth.map(v => ({
             yearMonth: v.yearMonth,
-            violationCount: v.violationCount,
+            lateTripCount: v.lateTripCount,
+            alcoholViolationCount: v.alcoholViolationCount,
+            somnolenceViolationCount: v.somnolenceViolationCount,
+            totalViolationCount: v.totalViolationCount,
         }))
     }, [violationsByMonth]);
 
@@ -73,7 +76,7 @@ const Home: React.FC = () => {
                         <XAxis dataKey="yearMonth" />
                         <YAxis />
                         <Tooltip />
-                        <Line type="monotone" dataKey="violationCount" stroke="#E74C3C" strokeWidth={3} activeDot={{ r: 8 }} />
+                        <Line type="monotone" dataKey="totalViolationCount" stroke="#E74C3C" strokeWidth={3} activeDot={{ r: 8 }} />
                     </LineChart>
                 </ResponsiveContainer>
             </div>
@@ -86,7 +89,7 @@ const Home: React.FC = () => {
                         <XAxis dataKey="yearMonth" />
                         <YAxis />
                         <Tooltip />
-                        <Line type="monotone" dataKey="tripCount" stroke="#3498DB" strokeWidth={3} activeDot={{ r: 8 }} />
+                        <Line type="monotone" dataKey="completedTripCount" stroke="#3498DB" strokeWidth={3} activeDot={{ r: 8 }} />
                     </LineChart>
                 </ResponsiveContainer>
             </div>

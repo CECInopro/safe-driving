@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import '../styles/CreateStopForm.scss';
 import { useAuth } from "../contexts/AuthContext";
+import { useStop } from "../hooks/useStop";
 
 const Base_URL = import.meta.env.VITE_BASE_URL as string;
 interface CreateStopFormProps {
@@ -11,6 +12,8 @@ interface CreateStopFormProps {
 
 const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onClose }) => {
     const { token } = useAuth();
+    const { AllStop, loading: stopLoading } = useStop();
+    const [selectedStopId, setSelectedStopId] = useState<string>("");
     const [nameStop, setNameStop] = useState("");
     const [type, setType] = useState("PICKUP");
     const [exactAddress, setExactAddress] = useState("");
@@ -32,23 +35,60 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onCl
         return headers;
     };
 
+    // Xử lý khi chọn stop từ dropdown
+    const handleStopSelect = (stopId: string) => {
+        setSelectedStopId(stopId);
+        if (stopId && stopId !== "") {
+            const selectedStop = AllStop.find(s => s.stopId === stopId);
+            if (selectedStop) {
+                setNameStop(selectedStop.nameStop || "");
+                setType(selectedStop.type || "PICKUP");
+                setExactAddress(selectedStop.exactAddress || "");
+                setProvince(selectedStop.province || "");
+                setCommune(selectedStop.commune || "");
+            }
+        } else {
+            setNameStop("");
+            setExactAddress("");
+            setProvince("");
+            setCommune("");
+            setLat("");
+            setLng("");
+            setType("PICKUP");
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const fullAddress = `${exactAddress}, ${commune}, ${province}`;
+        let latitude: number;
+        let longitude: number;
+        if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+            latitude = parseFloat(lat);
+            longitude = parseFloat(lng);
+        } else {
+            const fullAddress = `${exactAddress}, ${commune}, ${province}`;
 
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`);
-            const data = await res.json();
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`);
+                const data = await res.json();
 
-            if (!data || data.length === 0) {
-                alert("Không tìm thấy tọa độ địa điểm!");
+                if (!data || data.length === 0) {
+                    alert("Không tìm thấy tọa độ địa điểm!");
+                    return;
+                }
+                latitude = parseFloat(data[0].lat);
+                longitude = parseFloat(data[0].lon);
+                setLat(data[0].lat);
+                setLng(data[0].lon);
+            } catch (error) {
+                console.error("Error fetching coordinates:", error);
+                alert("Có lỗi xảy ra khi lấy tọa độ!");
                 return;
             }
-            const latitude = parseFloat(data[0].lat);
-            const longitude = parseFloat(data[0].lon);
-            setLat(data[0].lat);
-            setLng(data[0].lon);
+        }
+
+        try {
 
             const result = {
                 routeId,
@@ -76,9 +116,15 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onCl
 
             console.log("STOP CREATED:", result);
             alert("Tạo điểm dừng thành công!");
+            if (onSubmit) {
+                onSubmit(result);
+            }
+            if (onClose) {
+                onClose();
+            }
         } catch (error) {
-            console.error("Error fetching coordinates:", error);
-            alert("Có lỗi xảy ra khi lấy tọa độ!");
+            console.error("Error creating stop:", error);
+            alert("Có lỗi xảy ra khi tạo điểm dừng!");
         }
     };
 
@@ -86,6 +132,22 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onCl
         <div className="stop-form-modal">
             <form className="stop-form" onSubmit={handleSubmit}>
                 <h3>Tạo điểm dừng</h3>
+
+                <div>
+                    <label>Chọn điểm dừng có sẵn (tùy chọn)</label>
+                    <select
+                        value={selectedStopId}
+                        onChange={(e) => handleStopSelect(e.target.value)}
+                        disabled={stopLoading}
+                    >
+                        <option value="">-- Nhập tay --</option>
+                        {AllStop.map((stop) => (
+                            <option key={stop.stopId} value={stop.stopId}>
+                                {stop.nameStop} - {stop.exactAddress}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
                 <div>
                     <label>Tên điểm dừng</label>
@@ -125,8 +187,10 @@ const CreateStopForm: React.FC<CreateStopFormProps> = ({ routeId, onSubmit, onCl
                     <input value={end} onChange={(e) => setEnd(e.target.value)} />
                 </div>
 
-                <button type="submit" onClick={handleSubmit}>Tạo điểm dừng</button>
-                <button type="button" onClick={onClose}>Hủy</button>
+                <div className="button-group">
+                    <button type="submit" onClick={handleSubmit}>Tạo điểm dừng</button>
+                    <button type="button" onClick={onClose}>Hủy</button>
+                </div>
             </form>
         </div>
     );

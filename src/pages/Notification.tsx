@@ -1,15 +1,27 @@
 import React, { useEffect, useState } from "react";
+import { FaEye } from "react-icons/fa";
 import "../styles/Notification.scss";
 import { getAllNotifications, deleteNotification, type NotificationItem } from "../firebase/firebase-messaging";
 import { useAuth } from "../contexts/AuthContext";
+import VehicleMapModal from "../components/VehicleMapModal";
+import { useVehicles } from "../hooks/useVehicles";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
+
+type SelectedVehicle = {
+    vehicleId: string;
+    deviceId: string;
+    plateNumber: string;
+};
+
 const Notification: React.FC = () => {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [selectedVehicle, setSelectedVehicle] = useState<SelectedVehicle | null>(null);
     const { token } = useAuth();
+    const { vehicles } = useVehicles();
 
     useEffect(() => {
         const loadNotifications = () => {
@@ -200,10 +212,53 @@ const Notification: React.FC = () => {
                                     </button>
                                 </div>
                             )}
+
+                            {/* Hiển thị nút FaEye cho thông báo violation */}
+                            {topic === 'violation' && vehiclePlateNumber && (
+                                <div className="notification-actions">
+                                    <button 
+                                        className="action-btn view-btn" 
+                                        onClick={() => {
+                                            // Tìm xe từ danh sách dựa trên biển số
+                                            const vehicle = vehicles.find(
+                                                v => v.plateNumber?.toLowerCase() === vehiclePlateNumber.toLowerCase()
+                                            );
+                                            
+                                            // Sử dụng thông tin từ danh sách xe hoặc từ payload
+                                            const finalVehicleId = payload?.data?.vehicleId || vehicle?.vehicleId || deviceId || '';
+                                            const finalDeviceId = deviceId || vehicle?.deviceId || finalVehicleId;
+                                            
+                                            if (finalVehicleId && finalDeviceId) {
+                                                setSelectedVehicle({
+                                                    vehicleId: finalVehicleId,
+                                                    deviceId: finalDeviceId,
+                                                    plateNumber: vehiclePlateNumber,
+                                                });
+                                            } else {
+                                                setErrorMessage("Không tìm thấy thông tin xe. Vui lòng thử lại sau.");
+                                            }
+                                        }}
+                                        title="Xem vị trí và camera xe"
+                                    >
+                                        <FaEye style={{ marginRight: '8px', fontSize: '16px' }} />
+                                        Xem xe
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     );
                 })}
             </div>
+
+            {/* Modal hiển thị vị trí và camera xe */}
+            {selectedVehicle && (
+                <VehicleMapModal
+                    plateNumber={selectedVehicle.plateNumber}
+                    vehicleId={selectedVehicle.vehicleId}
+                    deviceId={selectedVehicle.deviceId}
+                    onClose={() => setSelectedVehicle(null)}
+                />
+            )}
         </div>
     );
 };

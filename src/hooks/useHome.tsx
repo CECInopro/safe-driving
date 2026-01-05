@@ -10,12 +10,15 @@ export type UserByMonth = {
 
 export type TripCompletedByMonth = {
     yearMonth: string
-    tripCount: number
+    completedTripCount: number
 }
 
 export type ViolationByMonth = {
     yearMonth: string
-    violationCount: number
+    lateTripCount: number
+    alcoholViolationCount: number
+    somnolenceViolationCount: number
+    totalViolationCount: number
 }
 
 export const useHome = () => {
@@ -104,7 +107,7 @@ export const useHome = () => {
             }
             const data = payload.map((t: any) => ({
                 yearMonth: t.yearMonth,
-                tripCount: t.tripCount,
+                completedTripCount: t.completedTripCount,
             }));
             setTripsByMonth(data);
             return data;
@@ -142,7 +145,10 @@ export const useHome = () => {
             }
             const data = payload.map((v: any) => ({
                 yearMonth: v.yearMonth,
-                violationCount: v.violationCount,
+                lateTripCount: v.lateTripCount,
+                alcoholViolationCount: v.alcoholViolationCount,
+                somnolenceViolationCount: v.somnolenceViolationCount,
+                totalViolationCount: v.totalViolationCount,
             }));
             setViolationsByMonth(data);
             return data;

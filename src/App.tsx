@@ -50,7 +50,7 @@ function App() {
 					<Route
 						path="/route-manager"
 						element={
-							<ProtectedRoute>
+							<ProtectedRoute requiredRole='admin'>
 								<RouteManager />
 							</ProtectedRoute>
 						}
@@ -82,7 +82,7 @@ function App() {
 					<Route
 						path="/update-firmware"
 						element={
-							<ProtectedRoute>
+							<ProtectedRoute requiredRole='admin'>
 								<Update_Firmware />
 							</ProtectedRoute>
 						}

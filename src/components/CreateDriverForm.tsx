@@ -56,14 +56,14 @@ const CreateDriverForm: React.FC<CreateDriverFormProps> = ({ onSuccess, onCancel
             if (waitingCardRef.current) {
                 // Chỉ hiện "thành công" khi nhận được "✅ Ghi dữ liệu thành công!" từ ESP32
                 // Không phải "✅ Dữ liệu nhận thành công. Chạm thẻ để ghi!"
-                if (/✅.*Ghi.*thành công|✅ Ghi dữ liệu thành công/i.test(message)) {
-                    setCardMessage("✅ Ghi thẻ thành công!");
+                if (/.*Ghi.*thành công| Ghi dữ liệu thành công/i.test(message)) {
+                    setCardMessage(" Ghi thẻ thành công!");
                     setTimeout(() => {
                         setWaitingCard(false);
                         setCardMessage("");
                     }, 2000);
                 } else if (/❌.*Ghi.*thất bại|❌ Ghi dữ liệu thất bại/i.test(message)) {
-                    setCardMessage("❌ Ghi thẻ thất bại, vui lòng thử lại.");
+                    setCardMessage(" Ghi thẻ thất bại, vui lòng thử lại.");
                 } else if (message.includes("Chạm thẻ") || message.includes("chạm thẻ") || message.includes("Dữ liệu nhận thành công")) {
                     // ESP32 yêu cầu chạm thẻ hoặc xác nhận đã nhận dữ liệu
                     setCardMessage("🪪 " + message);

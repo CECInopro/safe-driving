@@ -29,14 +29,14 @@ const RouteManager: React.FC = () => {
     return (
         <div className="route-manager">
             <div className="route-manager__top">
-                <h2>Quản lý chuyến đi</h2>
+                <h1>Quản lý tuyến đi</h1>
                 <div className="route-manager-actions">
-                    <input 
-                        type="text" 
-                        className="route-manager__search" 
-                        placeholder="Tìm kiếm" 
-                        value={query} 
-                        onChange={(e) => setQuery(e.target.value)} 
+                    <input
+                        type="text"
+                        className="route-manager__search"
+                        placeholder="Tìm kiếm"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
                     />
                     <button
                         className="btn btn--primary"

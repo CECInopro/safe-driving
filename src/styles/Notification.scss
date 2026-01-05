@@ -288,6 +288,17 @@
             }
         }
 
+        &.view-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+
+            &:hover:not(:disabled) {
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+            }
+        }
+
         &:active:not(:disabled) {
             transform: translateY(0);
         }

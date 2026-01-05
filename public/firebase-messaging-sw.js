@@ -1,6 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
+//config firebase
+
 firebase.initializeApp({
     apiKey: "AIzaSyDKCzk80RBsZ9yoTWKVL5ILYgH0ww5jfbE",
     authDomain: "fcm-driver-management.firebaseapp.com",
@@ -32,13 +34,12 @@ messaging.onBackgroundMessage(function (payload) {
             // Có cửa sổ đang mở, gửi message để foreground handler xử lý
             clientList.forEach(function (client) {
                 try {
-                    client.postMessage({ 
-                        type: 'FCM_BACKGROUND_MESSAGE', 
+                    client.postMessage({
+                        type: 'FCM_BACKGROUND_MESSAGE',
                         payload: payload,
                         action: 'save_notification'
                     });
                 } catch (e) {
-                    // ignore
                 }
             });
         }
@@ -54,12 +55,12 @@ self.addEventListener('notificationclick', function (event) {
             if (clientList.length > 0) {
                 const client = clientList[0];
                 client.focus();
-                try { 
-                    client.postMessage({ 
-                        type: 'FCM_NOTIFICATION_CLICK', 
+                try {
+                    client.postMessage({
+                        type: 'FCM_NOTIFICATION_CLICK',
                         payload: payload,
                         action: 'save_notification'
-                    }); 
+                    });
                 } catch (e) { }
                 return;
             }

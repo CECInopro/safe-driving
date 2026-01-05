@@ -4,6 +4,17 @@ import type { NavigateFunction } from "react-router-dom";
 import { AUTH_STORAGE_KEY } from "../contexts/AuthContext";
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
+// Interface cho notification item
+export interface NotificationItem {
+    id: string;
+    timestamp: number;
+    payload: MessagePayload;
+    isRead: boolean;
+    topic: 'yesno' | 'violation' | 'info';
+    responded?: boolean;
+}
+
+//config firebase
 const firebaseConfig = {
     apiKey: "AIzaSyDKCzk80RBsZ9yoTWKVL5ILYgH0ww5jfbE",
     authDomain: "fcm-driver-management.firebaseapp.com",
@@ -17,7 +28,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// Lấy FCM Token
+// Lấy FCM token 
 export const initNotification = async () => {
     try {
         const token = await getToken(messaging);
@@ -25,7 +36,7 @@ export const initNotification = async () => {
 
         if (token) {
             const xRequestId = crypto.randomUUID();
-            // 👇 Gửi token về server (BE)
+            //  Gửi token về server (BE)
             let authToken: string | null = null;
             try {
                 const stored = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -63,93 +74,26 @@ export const initNotification = async () => {
     }
 };
 
-// Interface cho notification item
-export interface NotificationItem {
-    id: string;
-    timestamp: number;
-    payload: MessagePayload;
-    isRead: boolean;
-    topic: 'yesno' | 'violation' | 'info';
-    responded?: boolean;
-}
-
 // Function để xác định topic của thông báo
 const determineNotificationTopic = (payload: MessagePayload): 'yesno' | 'violation' | 'info' => {
-    const data = (payload as any).data || {} as Record<string, string>;
+    const data = (payload as any).data || {};
 
-    // 1) Ưu tiên topic ở cấp top-level của payload (theo yêu cầu)
-    const rawTopic = (((payload as any).topic) || '').toString().trim();
-    if (rawTopic) {
-        const normalized = rawTopic.toLowerCase();
+    // Kiểm tra topic ở cấp top-level của payload
+    const rawTopic = ((payload as any).topic || '').toString().trim();
+    if (rawTopic === 'NotificationConfirm') return 'yesno';
+    if (rawTopic === 'NotificationViolation') return 'violation';
+    if (rawTopic === 'NotificationInfo') return 'info';
 
-        // Map 2 loại topic chuẩn mà bạn yêu cầu
-        if (rawTopic === 'NotificationConfirm' || normalized === 'notificationconfirm') return 'yesno';
-        if (rawTopic === 'NotificationViolation' || normalized === 'notificationviolation') return 'violation';
-        if (rawTopic === 'NotificationInfo' || normalized === 'notificationinfo') return 'info';
+    // Fallback: kiểm tra topic trong data
+    const rawTopicInData = (data.topic || '').toString().trim();
+    if (rawTopicInData === 'NotificationConfirm') return 'yesno';
+    if (rawTopicInData === 'NotificationViolation') return 'violation';
+    if (rawTopicInData === 'NotificationInfo') return 'info';
 
-        // Map các biến thể/đồng nghĩa về 2 nhóm
-        const yesNoAliases = new Set([
-            'yesno', 'yes_no', 'confirm', 'confirmation', 'approval', 'approve', 'request', 'action', 'yn', 'choice', 'prompt'
-        ]);
-        const violationAliases = new Set([
-            'violation', 'alert', 'breach', 'rule_violation', 'warning', 'incident', 'offense', 'infraction'
-        ]);
-
-        if (yesNoAliases.has(normalized)) return 'yesno';
-        if (violationAliases.has(normalized)) return 'violation';
-
-        // Nếu topic khác nhưng có pattern rõ ràng
-        if (normalized.includes('violation') || normalized.includes('viol')) return 'violation';
-        if (normalized.includes('confirm') || normalized.includes('approve')) return 'yesno';
-    }
-
-    // 2) Fallback đọc từ data.topic nếu có (phòng trường hợp BE đặt topic trong data)
-    const rawTopicInData = (data as any).topic ? String((data as any).topic).trim() : '';
-    if (rawTopicInData) {
-        const normalizedInData = rawTopicInData.toLowerCase();
-
-        // Map trực tiếp 3 topic chuẩn ở data.topic
-        if (rawTopicInData === 'NotificationConfirm' || normalizedInData === 'notificationconfirm') return 'yesno';
-        if (rawTopicInData === 'NotificationViolation' || normalizedInData === 'notificationviolation') return 'violation';
-        if (rawTopicInData === 'NotificationInfo' || normalizedInData === 'notificationinfo') return 'info';
-
-        const yesNoAliases = new Set([
-            'yesno', 'yes_no', 'confirm', 'confirmation', 'approval', 'approve', 'request', 'action', 'yn', 'choice', 'prompt'
-        ]);
-        const violationAliases = new Set([
-            'violation', 'alert', 'breach', 'rule_violation', 'warning', 'incident', 'offense', 'infraction'
-        ]);
-        if (yesNoAliases.has(normalizedInData)) return 'yesno';
-        if (violationAliases.has(normalizedInData)) return 'violation';
-        if (normalizedInData.includes('violation') || normalizedInData.includes('viol')) return 'violation';
-        if (normalizedInData.includes('confirm') || normalizedInData.includes('approve')) return 'yesno';
-    }
-
-    // 3) Fallback heuristic khi không có topic rõ ràng
-    // Nếu có deviceId và vehiclePlateNumber thì là yesno (cần phản hồi)
-    if (data.deviceId && (data as any).vehiclePlateNumber) {
-        return 'yesno';
-    }
-
-    // Nếu có violationType hoặc violationCode thì là violation
-    if ((data as any).violationType || (data as any).violationCode) {
-        return 'violation';
-    }
-
-    // Nếu có actionType
-    if ((data as any).actionType === 'violation') {
-        return 'violation';
-    }
-
-    if ((data as any).actionType === 'confirm' || (data as any).requiresResponse === 'true') {
-        return 'yesno';
-    }
-
-    // 4) Mặc định: yesno
-    return 'yesno';
+    return 'info';
 };
 
-// Thay đổi function handleForegroundMessage
+// Lắng nghe thông báo khi app đang ở foreground
 export const handleForegroundMessage = (navigate: NavigateFunction) => {
     onMessage(messaging, async (payload: MessagePayload) => {
         // Sử dụng function saveNotification chung để tránh duplicate
@@ -158,7 +102,7 @@ export const handleForegroundMessage = (navigate: NavigateFunction) => {
     });
 };
 
-// Thêm function để lấy tất cả thông báo
+//  Function để lấy tất cả thông báo
 export const getAllNotifications = (): NotificationItem[] => {
     try {
         return JSON.parse(localStorage.getItem("fcm_notifications") || "[]");
@@ -167,7 +111,7 @@ export const getAllNotifications = (): NotificationItem[] => {
     }
 };
 
-// Thêm function để đánh dấu đã đọc
+// Function để đánh dấu đã đọc
 export const markNotificationAsRead = (notificationId: string) => {
     try {
         const notifications = getAllNotifications();
@@ -183,7 +127,7 @@ export const markNotificationAsRead = (notificationId: string) => {
     }
 };
 
-// Thêm function để xóa thông báo
+// Function để xóa thông báo
 export const deleteNotification = (notificationId: string) => {
     try {
         const notifications = getAllNotifications();
@@ -192,6 +136,7 @@ export const deleteNotification = (notificationId: string) => {
         );
         localStorage.setItem("fcm_notifications", JSON.stringify(updatedNotifications));
         window.dispatchEvent(new Event("fcm_notifications_updated"));
+
     } catch (error) {
         console.error("Error deleting notification:", error);
     }

@@ -30,8 +30,8 @@ const Header: React.FC = () => {
                 <img src="/images/avatar.png" alt="User Icon" className="header-user-icon" onClick={toggleDropdown} />
                 {isDrop && (
                     <div className="header-dropdown">
-                        <button onClick={() => navigate('/profile')} className="header-dropdown-item">Hồ sơ</button>
-                        <button onClick={() => navigate('/settings')} className="header-dropdown-item">Cài đặt</button>
+                        {/* <button onClick={() => navigate('/profile')} className="header-dropdown-item">Hồ sơ</button>
+                        <button onClick={() => navigate('/settings')} className="header-dropdown-item">Cài đặt</button> */}
                         <button
                             onClick={() => {
                                 logout();

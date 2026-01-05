@@ -1,109 +1,171 @@
-/* === Overlay che nền === */
 .stop-form-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
+    animation: fadeIn 0.2s ease;
 }
 
-/* === Form chính === */
 .stop-form {
-    width: 420px;
-    background: #fff;
-    border-radius: 14px;
-    padding: 28px 26px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
-    animation: formShow 0.25s ease;
+    width: 480px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: formShow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 20px;
 }
 
-/* Animation mở form */
-@keyframes formShow {
-    from {
-        transform: scale(0.85);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* Title */
 .stop-form h3 {
-    margin-bottom: 4px;
+    margin: 0 0 8px 0;
     text-align: center;
-    font-weight: 600;
-    font-size: 20px;
-    color: #333;
+    font-weight: 700;
+    font-size: 24px;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
 }
 
-/* Mỗi nhóm input */
-.stop-form div {
+
+.stop-form>div {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
-/* Label */
 .stop-form label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #444;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
 }
 
-/* Input + Select */
 .stop-form input,
 .stop-form select {
-    padding: 10px;
-    border: 1.5px solid #dcdcdc;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: 0.25s;
+    padding: 12px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #1f2937;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* Hover/Focus đẹp hơn */
+.stop-form select {
+    cursor: pointer;
+    appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+.stop-form select:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+
+.stop-form input:hover:not(:disabled),
+.stop-form select:hover:not(:disabled) {
+    border-color: #d1d5db;
+}
+
 .stop-form input:focus,
 .stop-form select:focus {
-    border-color: #428bff;
-    box-shadow: 0 0 0 3px rgba(66, 139, 255, 0.25);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     outline: none;
+    background-color: #ffffff;
 }
 
 /* Button */
 .stop-form button {
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 14px;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
     border: none;
     cursor: pointer;
-    font-weight: 600;
-    transition: 0.25s;
+    transition: all 0.2s ease;
+    flex: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: inherit;
 }
 
 /* Nút tạo */
 .stop-form button[type="submit"] {
-    background: #007bff;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.stop-form button[type="submit"]:hover {
-    background: #005fcc;
+.stop-form button[type="submit"]:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.stop-form button[type="submit"]:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.stop-form button[type="submit"]:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
 /* Nút hủy */
 .stop-form button[type="button"] {
-    background: #f1f1f1;
-    color: #333;
+    background: #f3f4f6;
+    color: #374151;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .stop-form button[type="button"]:hover {
-    background: #e0e0e0;
+    background: #e5e7eb;
+    color: #1f2937;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.stop-form button[type="button"]:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar cho form dài */
+.stop-form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.stop-form::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.stop-form::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.stop-form::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
