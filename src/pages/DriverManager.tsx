@@ -25,6 +25,17 @@ const DriverManager: React.FC = () => {
         scanningRef.current = scanningDriverId !== null;
     }, [scanningDriverId]);
 
+    // useEffect(() => {
+    //     if (!scanningDriverId) return;
+
+    //     const timeout = setTimeout(() => {
+    //         setScanningDriverId(null);
+    //         setCardMessage("Hết thời gian quét thẻ");
+    //     }, 10000); // 10s
+
+    //     return () => clearTimeout(timeout);
+    // }, [scanningDriverId]);
+
     const { isConnected, publish } = useMqtt({
         topicPub: TOPIC_PUB,
         topicSub: TOPIC_SUB,
@@ -41,7 +52,7 @@ const DriverManager: React.FC = () => {
                     setCardMessage("Quét thẻ thất bại, vui lòng thử lại.");
                 } else if (message.includes("Chạm thẻ") || message.includes("chạm thẻ") || message.includes("Dữ liệu nhận thành công")) {
                     // ESP32 yêu cầu chạm thẻ hoặc xác nhận đã nhận dữ liệu
-                    setCardMessage("🪪 " + message);
+                    setCardMessage("" + message);
                 } else {
                     // Hiển thị các message khác
                     setCardMessage(message);
@@ -119,9 +130,9 @@ const DriverManager: React.FC = () => {
 
     // Xử lý quét thẻ
     const handleScanCard = (driverId: string) => {
-        console.log("🔍 handleScanCard called with driverId:", driverId);
-        console.log("🔍 isConnected:", isConnected);
-        console.log("🔍 TOPIC_PUB:", TOPIC_PUB);
+        console.log(" handleScanCard called with driverId:", driverId);
+        console.log(" isConnected:", isConnected);
+        console.log(" TOPIC_PUB:", TOPIC_PUB);
 
         if (!isConnected) {
             alert("MQTT chưa kết nối. Vui lòng thử lại sau.");
@@ -129,7 +140,7 @@ const DriverManager: React.FC = () => {
         }
 
         const result = publish(driverId);
-        console.log("🔍 publish result:", result);
+        console.log("publish result:", result);
 
         if (result) {
             console.log("Đã gửi driverId cho MQTT:", driverId, "vào topic:", TOPIC_PUB);
@@ -256,7 +267,7 @@ const DriverManager: React.FC = () => {
             {scanningDriverId && (
                 <div className="overlay">
                     <div className="overlay-box">
-                        <h3>{cardMessage || "🪪 Vui lòng quét thẻ trên màn hình..."}</h3>
+                        <h3>{cardMessage || " Vui lòng quét thẻ ..."}</h3>
                     </div>
                 </div>
             )}

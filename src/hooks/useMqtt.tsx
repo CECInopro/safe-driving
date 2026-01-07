@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import mqtt from "mqtt";
 
-const MQTT_URL = import.meta.env.VITE_MQTT_URL || "wss://8f3867bbff29467db818d8c01ceb8a7b.s1.eu.hivemq.cloud:8884/mqtt";
-const MQTT_USER = import.meta.env.VITE_MQTT_USER || "10112003dtc";
-const MQTT_PASS = import.meta.env.VITE_MQTT_PASS || "10112003Dtc";
+const MQTT_URL =  "wss://8f3867bbff29467db818d8c01ceb8a7b.s1.eu.hivemq.cloud:8884/mqtt";
+const MQTT_USER =  "10112003dtc";
+const MQTT_PASS =  "10112003Dtc";
 
 export type MqttOptions = {
     topicPub?: string;

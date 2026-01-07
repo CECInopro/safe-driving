@@ -115,7 +115,7 @@ export const useAccount = () => {
                     headers: buildHeaders(),
                     body: JSON.stringify(payload),
                 });
-
+                
                 const body = await res.json().catch(() => null);
 
                 if (!res.ok) {

@@ -40,31 +40,32 @@ const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints, color }) => 
 
         // Tạo routing control mới với màu tương ứng
         routingControlRef.current = L.Routing.control({
-            waypoints: waypoints,
+            waypoints,
             router: L.Routing.osrmv1({
                 serviceUrl: 'http://localhost:5001/route/v1',
                 profile: 'driving',
             }),
             draggableWaypoints: false,
-            routeWhileDragging: false,
+            addWaypoints: false,
             showAlternatives: false,
+            fitSelectedRoutes: false,
+            routeWhileDragging: false,
             lineOptions: {
                 styles: [
                     {
-                        color: color,
+                        color,
                         weight: 4,
-                        opacity: 0.7
+                        opacity: 0.7,
+                        interactive: false
                     }
                 ],
                 extendToWaypoints: true,
                 missingRouteTolerance: 0
             },
-
-            addWaypoints: false,
-            fitSelectedRoutes: true,
-            show: true,
-            collapsible: true,
+            createMarker: () => null 
         } as any).addTo(map);
+
+
 
         return () => {
             if (routingControlRef.current) {
@@ -192,7 +193,7 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
                             const isCurrent = currentOrder > 0 && stop.order === currentOrder;
 
                             return (
-                                <Marker key={stop.stopId} position={[stop.lat, stop.lng]}>
+                                <Marker pane="markerPane" key={stop.stopId} position={[stop.lat, stop.lng]}>
                                     <Popup>
                                         <div className="trip-map-modal__popup">
                                             <div className="trip-map-modal__popup-title">

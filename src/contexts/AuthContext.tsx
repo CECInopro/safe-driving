@@ -24,7 +24,7 @@ interface AuthContextType {
     token: string | null;
     login: (username: string, password: string) => Promise<LoginResult>;
     logout: () => void;
-    fetchAccounts: () => Promise<any[] | null>;
+    // fetchAccounts: () => Promise<any[] | null>;
     isAuthenticated: boolean;
     isAdmin: boolean;
     isManager: boolean;
@@ -108,37 +108,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
 
-    const fetchAccounts = useCallback(async (): Promise<any[] | null> => {
-        if (!user?.token) {
-            console.warn("Chưa đăng nhập hoặc thiếu token");
-            return null;
-        }
+    // const fetchAccounts = useCallback(async (): Promise<any[] | null> => {
+    //     if (!user?.token) {
+    //         console.warn("Chưa đăng nhập hoặc thiếu token");
+    //         return null;
+    //     }
 
-        const url = `${BASE_URL}/api/v1/accounts`;
+    //     const url = `${BASE_URL}/api/v1/accounts`;
 
-        try {
-            const response = await fetch(url, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Authorization": `Bearer ${user.token}`,
-                    "x-request-id": "111",
-                },
-            });
+    //     try {
+    //         const response = await fetch(url, {
+    //             method: "GET",
+    //             headers: {
+    //                 Accept: "application/json",
+    //                 "Authorization": `Bearer ${user.token}`,
+    //                 "x-request-id": "111",
+    //             },
+    //         });
 
-            const body = await response.json().catch(() => null);
+    //         const body = await response.json().catch(() => null);
 
-            if (!response.ok || !body?.success) {
-                console.error("Không thể tải danh sách tài khoản:", body);
-                return null;
-            }
+    //         if (!response.ok || !body?.success) {
+    //             console.error("Không thể tải danh sách tài khoản:", body);
+    //             return null;
+    //         }
 
-            return body.data ?? [];
-        } catch (err) {
-            console.error("Lỗi khi lấy danh sách tài khoản:", err);
-            return null;
-        }
-    }, [user]);
+    //         return body.data ?? [];
+    //     } catch (err) {
+    //         console.error("Lỗi khi lấy danh sách tài khoản:", err);
+    //         return null;
+    //     }
+    // }, [user]);
 
     const logout = useCallback(() => {
         setUser(null);
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         token: user?.token ?? null,
         login,
         logout,
-        fetchAccounts,
+        // fetchAccounts,
         isAuthenticated: !!user?.token,
         isAdmin: isAdminOrManager,
         isManager,

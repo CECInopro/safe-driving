@@ -78,13 +78,12 @@ export const initNotification = async () => {
 const determineNotificationTopic = (payload: MessagePayload): 'yesno' | 'violation' | 'info' => {
     const data = (payload as any).data || {};
 
-    // Kiểm tra topic ở cấp top-level của payload
     const rawTopic = ((payload as any).topic || '').toString().trim();
     if (rawTopic === 'NotificationConfirm') return 'yesno';
     if (rawTopic === 'NotificationViolation') return 'violation';
     if (rawTopic === 'NotificationInfo') return 'info';
 
-    // Fallback: kiểm tra topic trong data
+
     const rawTopicInData = (data.topic || '').toString().trim();
     if (rawTopicInData === 'NotificationConfirm') return 'yesno';
     if (rawTopicInData === 'NotificationViolation') return 'violation';
@@ -96,7 +95,6 @@ const determineNotificationTopic = (payload: MessagePayload): 'yesno' | 'violati
 // Lắng nghe thông báo khi app đang ở foreground
 export const handleForegroundMessage = (navigate: NavigateFunction) => {
     onMessage(messaging, async (payload: MessagePayload) => {
-        // Sử dụng function saveNotification chung để tránh duplicate
         saveNotification(payload, 'foreground');
         navigate('/notification');
     });

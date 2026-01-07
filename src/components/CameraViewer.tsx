@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useEffect, useRef, useState } from 'react';
 
 type Props = {
@@ -40,17 +39,17 @@ const CameraViewer: React.FC<Props> = ({ wsUrl, autoStart = false }) => {
                     const ctx = canvas.getContext('2d');
                     if (!ctx) return;
 
-                    // Resize canvas for CSS size and devicePixelRatio for sharp rendering
+                    // fit image
                     const dpr = window.devicePixelRatio || 1;
                     const displayWidth = canvas.clientWidth;
                     const displayHeight = canvas.clientHeight;
                     canvas.width = Math.round(displayWidth * dpr);
                     canvas.height = Math.round(displayHeight * dpr);
-                    // make drawing coordinates in CSS pixels
+
                     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                     ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-                    // Calculate scale to COVER the canvas (like object-fit: cover)
+
                     const scale = Math.max(displayWidth / img.width, displayHeight / img.height);
                     const drawWidth = img.width * scale;
                     const drawHeight = img.height * scale;
@@ -78,13 +77,12 @@ const CameraViewer: React.FC<Props> = ({ wsUrl, autoStart = false }) => {
             setIsConnected(false);
             if (running) {
                 const reason = event.reason || `Disconnected (code ${event.code})`;
-                setErrorMessage(reason);
+                // setErrorMessage(reason);
                 console.error('Camera WS closed:', reason);
             }
         };
 
         ws.onerror = (err: Event) => {
-            // Browser does not expose detailed error; log event and set generic message
             console.error('Camera WS error', err);
             setIsConnected(false);
             setErrorMessage('Không thể kết nối tới camera. Vui lòng kiểm tra URL và mạng.');
@@ -103,7 +101,7 @@ const CameraViewer: React.FC<Props> = ({ wsUrl, autoStart = false }) => {
         };
     }, [running, wsUrl]);
 
-    // stop when component unmounts
+
     useEffect(() => {
         return () => {
             if (wsRef.current) {

@@ -12,7 +12,6 @@ const TripManager: React.FC = () => {
     const { tripsWithAssignment, loading, error, refetch } = useTrip();
     const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
     const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
-    const [showScheduledForm, setShowScheduledForm] = useState<boolean>(false);
     const [selectedTripForAssignment, setSelectedTripForAssignment] = useState<{
         tripId: string;
         tripCode?: string;
@@ -22,10 +21,19 @@ const TripManager: React.FC = () => {
     const filteredTrips = useMemo(() => {
         const q = query.toLowerCase();
         return tripsWithAssignment.filter((t) =>
-            t.code.toLowerCase().includes(q) ||
-            t.routeName.toLowerCase().includes(q)
+            (t.code?.toLowerCase().includes(q) ?? false) ||
+            (t.routeName?.toLowerCase().includes(q) ?? false)
         );
     }, [tripsWithAssignment, query]);
+
+    const getTripStatus = (trip: any) => {
+        const currentOrder = trip.currentOrder || 0;
+        const totalStop = trip.totalStop || 0;
+
+        if (currentOrder === 0) return 'Chưa bắt đầu';
+        if (currentOrder >= totalStop) return 'Đã kết thúc';
+        return `Đang diễn ra`;
+    };
 
     return (
         <>
@@ -33,7 +41,12 @@ const TripManager: React.FC = () => {
                 <div className="trip-manager__top">
                     <h2>Quản lý chuyến đi</h2>
                     <div className="trip-manager__actions">
-                        <input className="trip-manager__search" placeholder="Tìm kiếm chuyến đi" value={query} onChange={(e) => setQuery(e.target.value)} />
+                        <input
+                            className="trip-manager__search"
+                            placeholder="Tìm kiếm chuyến đi"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                        />
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button className="btn btn--primary" onClick={() => setShowCreateForm(true)}>+ Thêm</button>
@@ -72,23 +85,9 @@ const TripManager: React.FC = () => {
                                     : '-';
                                 const vehiclePlate = t.assignment?.vehicle?.plateNumber || '-';
 
-                                // Tính toán trạng thái dựa trên thời gian thực tế
-                                const getTripStatus = () => {
-                                    const hasStartTime = t.startTime && typeof t.startTime === 'string' && t.startTime.trim() !== '';
-                                    const hasEndTime = t.endTime && typeof t.endTime === 'string' && t.endTime.trim() !== '';
-
-                                    if (!hasStartTime) {
-                                        return 'Chưa bắt đầu';
-                                    } else if (hasStartTime && !hasEndTime) {
-                                        return 'Đang diễn ra';
-                                    } else {
-                                        return 'Đã kết thúc';
-                                    }
-                                };
-
-                                const status = getTripStatus();
-                                const statusClass = status === 'Chưa bắt đầu' ? 'status-pending'
-                                    : status === 'Đang diễn ra' ? 'status-active'
+                                const status = getTripStatus(t);
+                                const statusClass = status.startsWith('Chưa bắt đầu') ? 'status-pending'
+                                    : status.startsWith('Đang diễn ra') ? 'status-active'
                                         : 'status-completed';
 
                                 return (
@@ -116,13 +115,11 @@ const TripManager: React.FC = () => {
                                                 {!t.assignment && (
                                                     <FaUserPlus
                                                         style={{ cursor: 'pointer', fontSize: '18px', color: '#1976d2' }}
-                                                        onClick={() => {
-                                                            setSelectedTripForAssignment({
-                                                                tripId: t.tripId,
-                                                                tripCode: t.code,
-                                                                routeName: t.routeName,
-                                                            });
-                                                        }}
+                                                        onClick={() => setSelectedTripForAssignment({
+                                                            tripId: t.tripId,
+                                                            tripCode: t.code,
+                                                            routeName: t.routeName,
+                                                        })}
                                                         title="Gán tài xế"
                                                     />
                                                 )}
@@ -160,9 +157,7 @@ const TripManager: React.FC = () => {
                     tripCode={selectedTripForAssignment.tripCode}
                     routeName={selectedTripForAssignment.routeName}
                     onClose={() => setSelectedTripForAssignment(null)}
-                    onSuccess={() => {
-                        setSelectedTripForAssignment(null);
-                    }}
+                    onSuccess={() => setSelectedTripForAssignment(null)}
                     onCancel={() => setSelectedTripForAssignment(null)}
                 />
             )}

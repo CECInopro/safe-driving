@@ -6,8 +6,7 @@ type Props = {
 };
 
 const VehicleCamera: React.FC<Props> = ({ vehicleId }) => {
-    const cameraWsUrl = `ws://26.157.165.184:8080/api/v1/ws?vehicleId=${encodeURIComponent(vehicleId)}`;
-
+    const cameraWsUrl = `ws://54.254.62.132:8080/api/v1/ws?vehicleId=${encodeURIComponent(vehicleId)}`;
     return (
         <div className="vehicle-camera">
             <CameraViewer wsUrl={cameraWsUrl} autoStart={false} />
