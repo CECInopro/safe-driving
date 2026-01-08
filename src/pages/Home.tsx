@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { FaEye } from 'react-icons/fa';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
