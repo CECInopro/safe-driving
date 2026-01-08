@@ -92,6 +92,13 @@
     background-color: #ffffff;
 }
 
+/* Button Group */
+.stop-form .button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
 /* Button */
 .stop-form button {
     padding: 14px 24px;
@@ -168,4 +175,12 @@
 
 .stop-form::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+}
+
+.stop-form__loading-text {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 8px;
+    font-style: italic;
+    text-align: center;
 }

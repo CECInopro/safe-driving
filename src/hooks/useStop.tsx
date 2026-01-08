@@ -60,7 +60,7 @@ export const useStop = () => {
                 nameStop: d.nameStop,
                 type: d.type,
                 province: d.province,
-                comune: d.commune,
+                commune: d.commune,
                 exactAddress: d.exactAddress,
             }))
             setAllStop(data);

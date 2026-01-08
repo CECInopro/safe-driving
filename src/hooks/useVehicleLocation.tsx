@@ -17,7 +17,7 @@ export const useVehicleLocation = (vehicleId: string, intervalMs: number = 3000)
     const { token } = useAuth();
 
     useEffect(() => {
-        if (!token) {
+        if (!token || !vehicleId || vehicleId.trim() === '') {
             setPositions([]);
             setVehicleLogId(null);
             setTimeVehicleLog(null);

@@ -6,6 +6,7 @@ import L from 'leaflet';
 import 'leaflet-routing-machine';
 import useTrip from '../hooks/useTrip';
 import type { TripWithAssignment, Stop } from '../hooks/useTrip';
+import { useVehicleLocation } from '../hooks/useVehicleLocation';
 import '../styles/TripMapModal.scss';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -23,6 +24,28 @@ type Props = {
 type RoutingSegmentProps = {
     waypoints: L.LatLng[];
     color: string;
+};
+
+// Component để fit bounds khi có cả tuyến đường và vị trí xe
+const MapBoundsUpdater: React.FC<{ stops: Stop[]; vehiclePosition?: [number, number] }> = ({ stops, vehiclePosition }) => {
+    const map = useMap();
+    
+    useEffect(() => {
+        if (stops.length === 0) return;
+        
+        const bounds = L.latLngBounds(
+            stops.map(s => [s.lat, s.lng] as [number, number])
+        );
+        
+        // Nếu có vị trí xe, thêm vào bounds
+        if (vehiclePosition) {
+            bounds.extend(vehiclePosition);
+        }
+        
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }, [map, stops, vehiclePosition]);
+    
+    return null;
 };
 
 const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints, color }) => {
@@ -81,6 +104,13 @@ const RoutingSegment: React.FC<RoutingSegmentProps> = ({ waypoints, color }) => 
 const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
     const { tripsWithAssignment } = useTrip();
     const trip = tripsWithAssignment.find((t: TripWithAssignment) => t.tripId === tripId);
+    
+    // Lấy vị trí hiện tại của xe nếu có vehicleId
+    const vehicleId = trip?.assignment?.vehicle?.vehicleId;
+    const { location: vehicleLocation, error: vehicleLocationError } = useVehicleLocation(
+        vehicleId || '', 
+        vehicleId ? 3000 : 0 // Chỉ cập nhật nếu có vehicleId, interval 0 sẽ không chạy
+    );
 
     if (!trip) {
         return (
@@ -166,6 +196,9 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
                     <div className="trip-map-modal__legend">
                         <span className="trip-map-modal__legend-visited">● Đã đi qua</span>
                         <span className="trip-map-modal__legend-unvisited">● Chưa đi qua</span>
+                        {vehicleLocation && vehicleLocation.position && (
+                            <span className="trip-map-modal__legend-vehicle" style={{ color: '#dc2626' }}>🚗 Vị trí tài xế</span>
+                        )}
                     </div>
                     <MapContainer
                         center={center}
@@ -176,6 +209,10 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <MapBoundsUpdater 
+                            stops={stops} 
+                            vehiclePosition={vehicleLocation?.position}
                         />
 
                         {/* Render các segments với màu sắc tương ứng */}
@@ -225,6 +262,43 @@ const TripMapModal: React.FC<Props> = ({ tripId, onClose }) => {
                                 </Marker>
                             );
                         })}
+
+                        {/* Render marker cho vị trí hiện tại của tài xế/xe */}
+                        {vehicleLocation && vehicleLocation.position && (
+                            <Marker 
+                                position={vehicleLocation.position}
+                                icon={L.icon({
+                                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                                    iconSize: [25, 41],
+                                    iconAnchor: [12, 41],
+                                    popupAnchor: [1, -34],
+                                    shadowSize: [41, 41]
+                                })}
+                            >
+                                <Popup>
+                                    <div className="trip-map-modal__popup">
+                                        <div className="trip-map-modal__popup-title" style={{ color: '#dc2626' }}>
+                                            🚗 Vị trí hiện tại của tài xế
+                                        </div>
+                                        <div className="trip-map-modal__popup-info">
+                                            <strong>Tài xế:</strong> {driverName}
+                                        </div>
+                                        <div className="trip-map-modal__popup-info">
+                                            <strong>Xe:</strong> {vehiclePlate}
+                                        </div>
+                                        <div className="trip-map-modal__popup-info">
+                                            <strong>Tọa độ:</strong> {vehicleLocation.position[0].toFixed(6)}, {vehicleLocation.position[1].toFixed(6)}
+                                        </div>
+                                        {vehicleLocation.timeVehicleLog && (
+                                            <div className="trip-map-modal__popup-info">
+                                                <strong>Thời điểm:</strong> {new Date(vehicleLocation.timeVehicleLog).toLocaleString('vi-VN')}
+                                            </div>
+                                        )}
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        )}
                     </MapContainer>
                 </div>
             </div>
