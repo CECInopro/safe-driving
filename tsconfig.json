@@ -1,28 +1,29 @@
 {
   "compilerOptions": {
+    /* React */
     "jsx": "react-jsx",
+    /* Target & Module */
     "target": "ES2022",
-    "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": [
       "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
-    "skipLibCheck": true,
-    /* Bundler mode */
+    "useDefineForClassFields": true,
+    /* Bundler (Vite) */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
-    /* Linting */
+    /* Strict & Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    /* Safe for FE */
+    "skipLibCheck": true
   },
   "include": [
     "src"
